@@ -132,23 +132,24 @@ export const PROFISSOES_LISTA = [
   "Biomédico(a)", "Bombeiro Hidráulico", "Borracheiro", "Cabeleireiro(a)", "Calheiro / Rufista", "Carpinteiro",
   "Carpinteiro de Obras / Fôrmas", "Caseiro(a) / Zelador(a)", "Chaveiro", "Coach / Mentor(a)", "Concretador",
   "Confeiteiro(a)", "Consultor(a) Financeiro", "Contador(a)", "Copeiro(a)", "Corretor(a) de Imóveis", "Corretor(a) de Seguros",
-  "Cozinheiro(a) / Buffet", "Cuidador(a) de Idosos", "Decorador(a) / Designer de Interiores", "Demolidor / Operador de Demolição",
+  "Cozinheiro(a) / Buffet", "Cuidador(a) de Idosos", "Designer de Interiores", 
   "Dentista", "Depilador(a)", "Designer de Sobrancelhas", "Designer Gráfico", "Desenvolvedor(a) Mobile", "Desenvolvedor(a) Web",
   "Departamento pessoal / RH", "Diarista / Faxineiro(a)", "DJ", "Dublador(a)", "Economista", "Editor(a) de Vídeo",
-  "Eletricista Automotivo", "Eletricista Predial / Residencial", "Encanador", "Encanador Industrial", "Enfermeiro(a)",
+  "Eletricista Automotivo", "Eletricista Predial,Residencial", "Encanador", "Encanador Industrial", "Enfermeiro(a)",
   "Engenheiro(a) Civil", "Engenheiro(a) Eletricista", "Engenheiro(a) Mecânico", "Engenheiro(a) ambiental",
-  "Escavador / Operador de Retroescavadeira", "Esteticista", "Farmacêutico(a)", "Fisioterapeuta", "Fonoaudiólogo(a)",
+   "Esteticista", "Farmacêutico(a)", "Fisioterapeuta", "Fonoaudiólogo(a)",
   "Fotógrafo(a)", "Garçom / Garçonete", "Gesseiro", "Guia de Turismo", "Impermeabilizador", "Instalador de Ar-Condicionado",
   "Instalador de Câmeras / Segurança", "Instalador de Drywall", "Instalador de Energia Solar", "Instalador de Insulfilm",
-  "Instalador de Papel de Parede", "Instalador de Piso Laminado / Vinílico", "Instalador de Pisos / Revestimentos",
+  "Instalador de Papel de Parede", "Instalador de Piso Laminado / Vinílico", "Instalador de Pisos,Revestimentos",
   "Instalador de cortinas / persianas", "Instalador de toldos / coberturas", "Instrutor(a) de Artes Marciais",
   "Instrutor(a) de Dança", "Instrutor(a) de Trânsito", "Instrutor(a) de Yoga", "Jardineiro", "Jornalista",
   "Ladrilheiro / Azulejista", "Luthier (Manutenção de Instrumentos)", "Maquiador(a)", "Marceneiro", "Manicure / Pedicure",
   "Marmoreiro", "Massoterapeuta", "Massagista", "Mecânico Automotivo", "Mecânico de Motos", "Médico(a)",
   "Mestre de Cerimônias", "Mestre de Obras", "Montador de Andaimes", "Montador de Estrutura Metálica", "Montador de Móveis",
-  "Moto-boy / Entregador(a)", "Motorista / Freteiro", "Nutricionista", "Operador de Betoneira", "Operador de Máquinas Pesadas",
-  "Ourives", "Padeiro", "Paisagista", "Pastilheiro / Revestidor", "Pedagogo(a)", "Pedreiro", "Personal Organizer",
-  "Personal Trainer", "Pintor Automotivo", "Pintor de Obras / Residencial", "Piscineiro", "Podólogo(a)", "Polidor Automotivo",
+  "Moto-boy / Entregador(a)", "Motorista / Freteiro", "Nutricionista", "Operad de Betoneira", "Operad de Máquinas Pesadas",
+  "Operad de Retroescavadeira","Operad de BobCat,Mini Carregadeira", "Operad de Empilhadeira", "Operad de Guindaste", "Operad de Pá Carregadeira",
+  "Ourives", "Operador de Demolição","Padeiro", "Paisagista", "Pastilheiro / Revestidor", "Pedagogo(a)", "Pedreiro", "Personal Organizer",
+  "Personal Trainer", "Pintor Automotivo", "Pintor de Obras,Residencial", "Piscineiro", "Podólogo(a)", "Polidor Automotivo",
   "Poceiro (Abertura de Poços)", "Professor(a)", "Psicólogo(a)", "Psicopedagogo(a)", "Publicitário(a)", "Recepcionista",
   "Recreador(a) Infantil", "Redator(a)", "Sapateiro", "Segurança / Vigilante", "Serviços Gerais / Auxiliar de Limpeza",
   "Serralheiro", "Sondador de Solo", "Social Media", "Soldador", "Tapeceiro / Estofador", "Tatuador(a)", "Técnico de Celular",
@@ -190,117 +191,100 @@ cityListWrapper?.addEventListener("click", (e) => {
 });
 
 // --- CONTROLE DO ACCORDION DE PROFISSÕES ---
-const profissaoAccordionHeader = document.getElementById("profissaoAccordionHeader");
-const profissaoAccordionDrawer = document.getElementById("profissaoAccordionDrawer");
-const profissaoArrowIcon = document.getElementById("profissaoArrowIcon");
-const profissaoInput = document.getElementById("profissaoInput");
-const profissaoListWrapper = document.getElementById("profissaoListWrapper");
-
-function toggleProfissaoAccordion(forceClose = false) {
-  const isOpen = forceClose ? false : !profissaoAccordionDrawer?.classList.contains("open");
-  profissaoAccordionDrawer?.classList.toggle("open", isOpen);
-  profissaoArrowIcon?.classList.toggle("open", isOpen);
+// Funções auxiliares para gerar a máscara inicial
+// Exibe somente os 3 primeiros dígitos do telefone sem caracteres extras
+function mascararTelefone(tel) {
+  const nums = tel.replace(/\D/g, "");
+  // Remove o DDD 61 caso esteja no início
+  const semDDD = nums.startsWith("61") ? nums.slice(2) : nums;
+  const tresPrimeiros = semDDD.slice(0, 3);
+  return `(61) ${tresPrimeiros}...`;
 }
 
-if (profissaoListWrapper) {
-  profissaoListWrapper.innerHTML = PROFISSOES_LISTA.map(
-    (prof) => `<button type="button" class="city-option">${prof}</button>`
-  ).join("");
+// Exibe somente um pedaço inicial do e-mail sem mostrar o restante
+function mascararEmail(em) {
+  const partes = em.split("@");
+  const user = partes[0] || "";
+  const pedaco = user.slice(0, 9);
+  return `${pedaco}...`;
 }
 
-profissaoAccordionHeader?.addEventListener("click", () => {
-  toggleCityAccordion(true); // fecha cidades se abrir profissão
-  toggleProfissaoAccordion();
-});
-
-profissaoListWrapper?.addEventListener("click", (e) => {
-  const btn = e.target.closest(".city-option");
-  if (!btn) return;
-  e.stopPropagation();
-  if (profissaoInput) profissaoInput.value = btn.textContent.trim();
-  toggleProfissaoAccordion(true);
-});
-
-
-// --- GERAÇÃO DO CARD HORIZONTAL COMPACTO EM DUAS COLUNAS ---
-// --- GERAÇÃO DO CARD DE VISITA (HÍBRIDO: 2 COLUNAS NO DESKTOP / CARD DUPLO VERTICAL NO MOBILE) ---
 export function criarCardVisitaHTML({ nome, idade, cidade, profissao, email, telefone, fotoUrl, instagram, linkedin }) {
-  // Trata números para link direto de WhatsApp
   const telNumeros = telefone.replace(/\D/g, "");
   const zapLink = telNumeros.length >= 10 ? `https://wa.me/55${telNumeros}` : `tel:${telNumeros}`;
   const mailLink = `mailto:${email}`;
 
-  // Botões de contato rápido para a barra mobile
-  const zapBtnMobile = `<a href="${zapLink}" target="_blank" rel="noopener noreferrer" class="card-quick-btn zap" title="WhatsApp"><i class="bi bi-whatsapp"></i></a>`;
-  const mailBtnMobile = `<a href="${mailLink}" class="card-quick-btn mail" title="Enviar E-mail"><i class="bi bi-envelope-fill"></i></a>`;
+  const telMascara = mascararTelefone(telefone);
+  const emailMascara = mascararEmail(email);
 
-  // Links sociais opcionais
+  // Redes Sociais opcionais
   let instaLink = "";
   if (instagram) {
     const userInsta = instagram.replace("@", "").trim();
-    instaLink = `<a href="https://instagram.com/${userInsta}" target="_blank" rel="noopener noreferrer" class="card-quick-btn insta" title="Instagram @${userInsta}"><i class="bi bi-instagram"></i></a>`;
+    instaLink = `<a href="https://instagram.com/${userInsta}" target="_blank" rel="noopener noreferrer" class="card-social-btn insta" title="Instagram @${userInsta}"><i class="bi bi-instagram"></i></a>`;
   }
 
   let linkedinLink = "";
   if (linkedin) {
     const isUrl = linkedin.startsWith("http");
     const fullLink = isUrl ? linkedin : `https://${linkedin}`;
-    linkedinLink = `<a href="${fullLink}" target="_blank" rel="noopener noreferrer" class="card-quick-btn linkedin" title="LinkedIn"><i class="bi bi-linkedin"></i></a>`;
+    linkedinLink = `<a href="${fullLink}" target="_blank" rel="noopener noreferrer" class="card-social-btn linkedin" title="LinkedIn"><i class="bi bi-linkedin"></i></a>`;
   }
 
   return `
     <div class="card-visita">
-      <!-- Avatar circular -->
-      <div class="card-avatar">
-        <img src="${fotoUrl}" alt="${nome}" onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=300'">
+      <!-- ÁREA DE PERFIL (ESQUERDA: IDENTIDADE) -->
+      <div class="card-perfil-col">
+        <div class="card-avatar">
+          <img src="${fotoUrl}" alt="${nome}" onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=300'">
+        </div>
+
+        <div class="card-dados-pessoais">
+          <div class="card-header-nome">
+            <h3 class="card-nome" title="${nome.toUpperCase()}">${nome.toUpperCase()}</h3>
+          </div>
+          
+          <div class="card-profissao-destaque" title="${profissao}">
+            <i class="bi bi-person-workspace"></i>
+            <span>${profissao}</span>
+          </div>
+
+          <div class="card-linha-discreta">
+            <i class="bi bi-geo-alt-fill"></i>
+            <span>${cidade}</span>
+            <span class="separador-bullet">•</span>
+            <span>${idade} anos</span>
+          </div>
+        </div>
       </div>
 
-      <div class="card-info">
-        <!-- Tarja com o nome do profissional -->
-        <div class="card-header-nome">
-          <h3 class="card-nome">${nome.toUpperCase()}</h3>
+      <!-- ÁREA DE AÇÃO (DIREITA: CONVERSÃO DIRETA COM REVELAÇÃO) -->
+      <div class="card-conversao-col">
+        <div class="card-contatos-lista">
+          <!-- Telefone Mascarado -->
+          <button type="button" 
+                  class="btn-revelar-contato zap-revelar" 
+                  data-real="${telefone}" 
+                  data-link="${zapLink}" 
+                  title="Clique para ver o telefone e chamar no WhatsApp">
+            <i class="bi bi-whatsapp"></i>
+            <span class="contato-texto">${telMascara}</span>
+            <span class="tag-olx-ver">Ver</span>
+          </button>
+
+          <!-- E-mail Mascarado -->
+          <button type="button" 
+                  class="btn-revelar-contato mail-revelar" 
+                  data-real="${email}" 
+                  data-link="${mailLink}" 
+                  title="Clique para ver o e-mail completo">
+            <i class="bi bi-envelope-fill"></i>
+            <span class="contato-texto">${emailMascara}</span>
+            <span class="tag-olx-ver">Ver</span>
+          </button>
         </div>
 
-        <div class="card-corpo-colunas">
-          <!-- Coluna 1: Dados pessoais e profissão -->
-          <ul class="card-coluna">
-            <li>
-              <i class="bi bi-person-plus"></i>
-              <span>${idade} anos</span>
-            </li>
-            <li>
-              <i class="bi bi-geo-alt-fill"></i>
-              <span>${cidade}</span>
-            </li>
-            <li class="item-profissao-destaque">
-              <i class="bi bi-person-workspace"></i>
-              <span class="texto-cortado" title="${profissao}">${profissao}</span>
-            </li>
-          </ul>
-
-          <!-- Coluna 2: Dados de contato detalhados (Exibidos em telas médias e desktop) -->
-          <ul class="card-coluna coluna-contatos-desktop">
-            <li>
-              <i class="bi bi-envelope-fill"></i>
-              <a href="${mailLink}" class="texto-cortado" title="${email}">${email}</a>
-            </li>
-            <li>
-              <i class="bi bi-telephone-fill"></i>
-              <a href="${zapLink}" target="_blank" rel="noopener noreferrer">${telefone}</a>
-            </li>
-            <li class="item-redes-sociais">
-              <div class="card-social-links">
-                ${instaLink}
-                ${linkedinLink}
-              </div>
-            </li>
-          </ul>
-        </div>
-
-        <!-- Barra de Ações Rápidas (Aparece no Mobile para facilitar contato com 1 toque) -->
-        <div class="card-acoes-mobile">
-          ${zapBtnMobile}
-          ${mailBtnMobile}
+        <div class="card-rodape-social">
           ${instaLink}
           ${linkedinLink}
         </div>
@@ -308,13 +292,6 @@ export function criarCardVisitaHTML({ nome, idade, cidade, profissao, email, tel
     </div>
   `;
 }
-
-
-
-
-
-
-
 
 
 
@@ -591,5 +568,31 @@ limparBuscaBtn?.addEventListener("click", () => {
     filtroProfissaoInput.value = "";
     filtrarCardsVitrine();
     filtroProfissaoInput.focus();
+  }
+});
+
+// --- EVENTO DE REVELAÇÃO DE CONTATO ESTILO OLX / MERCADO LIVRE ---
+cardsGrid?.addEventListener("click", (e) => {
+  const btnRevelar = e.target.closest(".btn-revelar-contato");
+  if (!btnRevelar) return;
+
+  const jaRevelado = btnRevelar.classList.contains("revelado");
+  const dadoReal = btnRevelar.getAttribute("data-real");
+  const linkReal = btnRevelar.getAttribute("data-link");
+
+  if (!jaRevelado) {
+    // 1º Clique: Revela o dado real e muda o estilo visual
+    btnRevelar.classList.add("revelado");
+    const spanTexto = btnRevelar.querySelector(".contato-texto");
+    if (spanTexto) spanTexto.textContent = dadoReal;
+
+    // Remove a etiquetinha "Ver"
+    const tagVer = btnRevelar.querySelector(".tag-olx-ver");
+    if (tagVer) tagVer.remove();
+  } else {
+    // 2º Clique: Redireciona diretamente para o WhatsApp ou abre o cliente de E-mail
+    if (linkReal) {
+      window.open(linkReal, "_blank");
+    }
   }
 });

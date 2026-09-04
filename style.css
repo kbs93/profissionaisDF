@@ -257,9 +257,8 @@ body {
 
 .cards-grid {
   display: grid;
-/* Dá espaço suficiente para acomodar profissões e e-mails longos sem apertar as colunas */
-  grid-template-columns: repeat(auto-fill, minmax(340px, 560px));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 490px));
+  gap: 20px;
   justify-content: center;
 }
 
@@ -267,32 +266,33 @@ body {
 /* ================= DESIGN COMPACTO DO CARD (HORIZONTAL 2 COLUNAS) ================= */
 
 /* Card principal: borda arredondada, sombra suave e espaçamento otimizado */
-.card-visita {
-  display: flex;
-  align-items: center;
-  background: #ffffff;
-  border-radius: 18px;
-  padding: 14px 18px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
-  gap: 16px;
-  border: 1.5px solid #cbd5e1;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
+/* Card principal: estrutura de grid com duas metades fluidas */
+
 
 .card-visita:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.09);
+  border-color: #cbd5e1;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
-/* Avatar circular do profissional */
+/* --- ÁREA DE PERFIL (ESQUERDA) --- */
+.card-perfil-col {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-right: 16px;
+  border-right: 1px solid #f1f5f9; /* Divisória vertical elegante pedida */
+  min-width: 0;
+}
+
 .card-avatar {
   flex-shrink: 0;
-  width: 96px;
-  height: 96px;
+  width: 78px;
+  height: 78px;
   border-radius: 50%;
   overflow: hidden;
   border: 2px solid #f1f5f9;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .card-avatar img {
@@ -302,20 +302,18 @@ body {
   display: block;
 }
 
-/* Área de conteúdo ao lado do avatar */
-.card-info {
-  flex-grow: 1;
+.card-dados-pessoais {
   display: flex;
   flex-direction: column;
+  gap: 4px;
   min-width: 0;
+  flex-grow: 1;
 }
 
-/* Tarja bege para destacar o nome */
 .card-header-nome {
   background: #f4efe9;
-  padding: 4px 10px;
+  padding: 3px 8px;
   border-radius: 6px;
-  margin-bottom: 8px;
   display: inline-block;
   align-self: flex-start;
   max-width: 100%;
@@ -323,129 +321,213 @@ body {
 
 .card-nome {
   margin: 0;
-  font-size: 0.92rem;
+  font-size: 0.85rem;
   font-weight: 700;
   color: #7c583f;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+/* Card principal: estrutura de grid balanceada dando mais espaço para nomes longos */
+/* Card principal: a coluna esquerda (1fr) ganha todo o espaço livre e a direita (auto) ocupa apenas o estritamente necessário */
+.card-visita {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 14px 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  border: 1.5px solid #e2e8f0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  min-height: 130px;
+}
+/* Linha discreta: Samambaia S • 65 anos */
+.card-linha-discreta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Profissão em evidência com suporte a até 2 linhas completas */
+.card-profissao-destaque {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 0.80rem;
+  line-height: 1.25;
+  font-weight: 600;
+  color: #0284c7;
+  min-width: 0;
+}
+
+.card-profissao-destaque span {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: normal;
+}
+.card-profissao-destaque i {
+  font-size: 0.88rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.card-linha-discreta i {
+  color: #94a3b8;
+  font-size: 0.82rem;
+}
+
+.separador-bullet {
+  color: #cbd5e1;
+  font-weight: bold;
+}
+
+/* --- ÁREA DE AÇÃO / CONVERSÃO (DIREITA) --- */
+/* --- ÁREA DE AÇÃO / CONVERSÃO (DIREITA: COMPACTA E JUSTA) --- */
+/* --- ÁREA DE AÇÃO / CONVERSÃO (DIREITA: LARGURA TRAVADA E PROTEGIDA) --- */
+.card-conversao-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 14px;
+  gap: 8px;
+  min-width: 0;
+  max-width: 175px;
+  width: 100%;
+}
+/* Botão do estilo Clique para Revelar (OLX / Mercado Livre) */
+.btn-revelar-contato {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 5px 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  width: 100%;
+  font-size: 0.78rem;
+  color: #334155;
+}
+
+.btn-revelar-contato:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.btn-revelar-contato:active {
+  transform: scale(0.98);
+}
+
+.btn-revelar-contato i {
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.zap-revelar i {
+  color: #16a34a;
+}
+
+.mail-revelar i {
+  color: #0284c7;
+}
+
+.contato-texto {
+  font-weight: 600;
+  font-family: inherit;
+  flex-grow: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-
-
-
-/* Duas colunas com proporção equilibrada (1.1fr para dados/profissão e 1.2fr para e-mail/contato) */
-.card-corpo-colunas {
-  display: grid;
-  grid-template-columns: 1.1fr 1.2fr;
-  gap: 16px;
-  align-items: start;
-  width: 100%;
+/* Etiqueta azul "Ver" */
+.tag-olx-ver {
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: #e0f2fe;
+  color: #0284c7;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
 }
 
-/* Lista de cada coluna */
-.card-coluna {
-  list-style: none;
+/* Estado após o clique (revelado) */
+.btn-revelar-contato.revelado {
+  background: #ffffff;
+  border-color: #cbd5e1;
+}
+
+.btn-revelar-contato.revelado:hover {
+  background: #f8fafc;
+  color: #0284c7;
+}
+
+.btn-revelar-contato.revelado .contato-texto {
+  white-space: normal;
+  word-break: break-all;
+}
+
+.card-contatos-lista {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-/* Linha com ícone e texto */
-.card-coluna li {
+.item-contato-link {
   display: flex;
-  align-items: flex-start; /* Alinha o ícone no topo caso o texto quebre em duas linhas */
+  align-items: center;
   gap: 8px;
-  font-size: 0.82rem;
-  color: #1e293b;
-  font-weight: 500;
-  line-height: 1.35;
-}
-
-/* Ícone alinhado perfeitamente com a primeira linha de texto */
-.card-coluna li i {
-  font-size: 0.95rem;
-  color: #0f172a;
-  width: 16px;
-  text-align: center;
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-/* Links de contato sem truncamento forçado */
-.card-coluna a {
-  color: inherit;
   text-decoration: none;
-  font-size: 0.82rem;
-  word-break: break-word; /* Se o e-mail for excessivamente grande, quebra suavemente sem vazar */
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #334155;
+  transition: color 0.15s ease;
+  min-width: 0;
 }
 
-.card-coluna a:hover {
+
+.item-contato-link i {
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.item-contato-link.zap-link {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.item-contato-link.zap-link i {
+  color: #16a34a;
+}
+
+.item-contato-link.mail-link i {
   color: #0284c7;
-  text-decoration: underline;
 }
 
-/* Permite que profissões extensas quebrem linha naturalmente em vez de cortar com reticências */
-.texto-cortado {
-  white-space: normal; /* Remove a trava de linha única */
-  word-break: normal;
-  display: inline;
+.item-contato-link:hover {
+  color: #0284c7;
 }
 
-
-/* Barra de botões de contato rápido */
-.card-social-links {
+.card-rodape-social {
   display: flex;
   align-items: center;
   gap: 6px;
+  margin-top: 2px;
 }
-
-.card-quick-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 6px;
-  background: #f1f5f9;
-  color: #334155;
-  text-decoration: none;
-  font-size: 0.88rem;
-  transition: transform 0.15s ease, background 0.15s ease;
-}
-
-.card-quick-btn:hover {
-  transform: translateY(-2px);
-}
-
-.card-quick-btn.zap {
-  background: #25d366;
-  color: #ffffff;
-}
-
-.card-quick-btn.mail {
-  background: #0284c7;
-  color: #ffffff;
-}
-
-.card-quick-btn.insta {
-  background: #e1306c;
-  color: #ffffff;
-}
-
-.card-quick-btn.linkedin {
-  background: #0077b5;
-  color: #ffffff;
-}
-
-/* No desktop a barra mobile fica oculta */
-.card-acoes-mobile {
-  display: none;
-}
-
-
 
 
 /* ================= SEÇÕES INSTITUCIONAIS ================= */
@@ -675,57 +757,77 @@ body {
     overflow-x: hidden;
   }
 
-  /* Grid seguro de 2 colunas: o minmax(0, 1fr) força a divisão em 50% sem deixar o conteúdo estourar a tela */
+
+/* Grid de 2 cards lado a lado sem vazar a tela */
   .cards-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
-    padding: 0;
+    padding: 0 4px;
     width: 100%;
     box-sizing: border-box;
   }
 
-  /* Cartão vertical com largura contida */
+  /* Card compacto vertical */
   .card-visita {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 6px;
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    border-radius: 14px;
+  }
+
+  /* Área superior (perfil) */
+  .card-perfil-col {
+    display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding: 10px 6px;
-    border-radius: 12px;
+    padding: 0 0 6px 0;
+    border-right: none;
+    border-bottom: 1px solid #f1f5f9;
     gap: 6px;
     width: 100%;
     min-width: 0;
+  }
+
+  .card-avatar {
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+  }
+
+
+
+
+.card-dados-pessoais {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Alinha o bloco de dados à esquerda */
+    width: 100%;
+    min-width: 0;
+    gap: 4px;
+    padding: 0 4px; /* Margem interna para não colar na borda */
     box-sizing: border-box;
   }
 
-  /* Avatar com tamanho fixo em 54px para caber em qualquer celular sem conflito */
-  .card-avatar {
-    width: 54px;
-    height: 54px;
-    min-width: 54px;
-    max-width: 54px;
-    margin: 0 auto;
-    border-width: 2px;
-  }
-
-  .card-info {
-    width: 100%;
-    min-width: 0;
-    align-items: center;
-  }
-
-  /* Tarja bege contida: não deixa o nome ultrapassar os limites do card */
+  /* Tarja do nome centralizada */
   .card-header-nome {
-    align-self: stretch;
-    padding: 2px 4px;
-    margin-bottom: 4px;
+    align-self: center; /* Mantém o nome centralizado no topo */
+    padding: 2px 6px;
+    max-width: 100%;
     width: 100%;
     box-sizing: border-box;
     overflow: hidden;
+    text-align: center;
+    margin-bottom: 2px;
   }
 
-  /* Corta nomes muito compridos com reticências para não empurrar as bordas */
   .card-nome {
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     letter-spacing: 0.2px;
     white-space: nowrap;
     overflow: hidden;
@@ -734,76 +836,133 @@ body {
     width: 100%;
   }
 
-  /* Coluna única vertical dentro do card */
-  .card-corpo-colunas {
-    grid-template-columns: 1fr;
-    gap: 4px;
-    width: 100%;
-    min-width: 0;
-  }
-
-  .card-coluna {
-    gap: 4px;
-    width: 100%;
-    min-width: 0;
-  }
-
-  /* Alinhamento à esquerda para manter a linha reta dos ícones */
-  .card-coluna li {
+  /* Profissão: alinhada à esquerda com ícone fixo */
+  .card-profissao-destaque {
     display: flex;
     align-items: flex-start;
     justify-content: flex-start;
     text-align: left;
-    font-size: 0.74rem;
-    gap: 5px;
     width: 100%;
     min-width: 0;
-    padding: 0 2px;
-    box-sizing: border-box;
+    font-size: 0.79rem;
+    line-height: 1.25;
+    gap: 6px;
   }
 
-  /* Ícone fixo em 14px */
-  .card-coluna li i {
-    font-size: 0.85rem;
-    width: 14px;
+  .card-profissao-destaque i {
+    font-size: 0.78rem;
+    width: 14px; /* Trava a mesma largura para todos os ícones */
     min-width: 14px;
     text-align: center;
+    flex-shrink: 0;
     margin-top: 1px;
+  }
+
+  .card-profissao-destaque span {
+    display: inline;
+    text-align: left;
+    word-break: break-word;
+  }
+
+  /* Cidade e Idade: alinhados à esquerda na mesma reta do ícone acima */
+  .card-linha-discreta {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: left;
+    width: 100%;
+    min-width: 0;
+    font-size: 0.75rem;
+    gap: 6px;
+    color: #64748b;
+  }
+
+  .card-linha-discreta i {
+    font-size: 0.78rem;
+    width: 14px; /* Mesma largura do ícone de cima para alinhar na reta */
+    min-width: 14px;
+    text-align: center;
     flex-shrink: 0;
   }
 
-  /* Altura padronizada para a profissão (iguala o tamanho dos dois cards lado a lado) */
-  .item-profissao-destaque {
-    font-weight: 600;
-    color: #0284c7;
-    min-height: 32px;
-    line-height: 1.2;
-    overflow: hidden;
-  }
 
-  /* Esconde e-mails e telefones por extenso na visualização mobile */
-  .coluna-contatos-desktop {
-    display: none;
-  }
 
-  /* Barra de botões de contato com quebra flexível caso haja mais de 3 ícones */
-  .card-acoes-mobile {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 4px;
-    flex-wrap: wrap;
-    margin-top: 6px;
-    padding-top: 6px;
-    border-top: 1px dashed #e2e8f0;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  /* Área inferior de contatos/conversão */
+  .card-conversao-col {
+    padding-left: 0;
+    max-width: 100%;
     width: 100%;
+    min-width: 0;
+    align-items: center;
+    gap: 6px;
   }
 
-  .card-acoes-mobile .card-quick-btn {
-    width: 26px;
-    height: 26px;
-    font-size: 0.8rem;
+  .card-contatos-lista {
+    width: 100%;
+    min-width: 0;
+    gap: 5px;
   }
+
+  /* Botão de contato adaptado para tela pequena */
+  .btn-revelar-contato {
+    width: 100%;
+    min-width: 0;
+    padding: 4px 6px;
+    font-size: 0.68rem;
+    gap: 4px;
+    box-sizing: border-box;
+  }
+
+  .btn-revelar-contato i {
+    font-size: 0.76rem;
+  }
+
+  .contato-texto {
+    font-size: 0.68rem;
+    min-width: 0;
+  }
+
+  .tag-olx-ver {
+    font-size: 0.60rem;
+    padding: 1px 4px;
+  }
+
+  .card-rodape-social {
+    justify-content: center;
+    width: 100%;
+    gap: 6px;
+  }
+
+  .card-social-btn {
+    width: 24px;
+    height: 24px;
+    font-size: 0.78rem;
+  }
+
+
+
+
+
+
+
+
+
+
+
 
   .hero-content h1 {
     font-size: 1.7rem;
