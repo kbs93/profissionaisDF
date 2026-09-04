@@ -666,130 +666,147 @@ body {
     display: block;
   }
 
- /* Grid mobile em 2 colunas lado a lado com espaçamento enxuto */
-  .cards-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    padding: 0;
-  }
 
+/* Espaçamento reduzido no container da vitrine mobile */
   .main-content {
-    padding: 30px 10px;
+    padding: 24px 8px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
   }
 
-  /* Cartão verticalizado para telas menores */
+  /* Grid seguro de 2 colunas: o minmax(0, 1fr) força a divisão em 50% sem deixar o conteúdo estourar a tela */
+  .cards-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    padding: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Cartão vertical com largura contida */
   .card-visita {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding: 12px 8px;
-    border-radius: 14px;
-    gap: 8px;
+    padding: 10px 6px;
+    border-radius: 12px;
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
   }
 
-  /* Avatar menor e centralizado no topo */
+  /* Avatar com tamanho fixo em 54px para caber em qualquer celular sem conflito */
   .card-avatar {
-    width: 64px;
-    height: 64px;
+    width: 54px;
+    height: 54px;
+    min-width: 54px;
+    max-width: 54px;
     margin: 0 auto;
+    border-width: 2px;
   }
 
   .card-info {
     width: 100%;
+    min-width: 0;
     align-items: center;
   }
 
-  /* Tarja com o nome centralizada e compacta */
+  /* Tarja bege contida: não deixa o nome ultrapassar os limites do card */
   .card-header-nome {
-    align-self: center;
-    padding: 3px 6px;
-    margin-bottom: 6px;
+    align-self: stretch;
+    padding: 2px 4px;
+    margin-bottom: 4px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  /* Corta nomes muito compridos com reticências para não empurrar as bordas */
+  .card-nome {
+    font-size: 0.72rem;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
     width: 100%;
   }
 
-  .card-nome {
-    font-size: 0.78rem;
-    letter-spacing: 0.3px;
-  }
-
-  /* Transforma as colunas internas em bloco único vertical */
+  /* Coluna única vertical dentro do card */
   .card-corpo-colunas {
     grid-template-columns: 1fr;
     gap: 4px;
     width: 100%;
+    min-width: 0;
   }
 
   .card-coluna {
     gap: 4px;
+    width: 100%;
+    min-width: 0;
   }
 
-/* Alinha os itens à esquerda com largura total, garantindo os ícones perfeitamente empilhados na mesma coluna */
+  /* Alinhamento à esquerda para manter a linha reta dos ícones */
   .card-coluna li {
     display: flex;
     align-items: flex-start;
     justify-content: flex-start;
     text-align: left;
-    font-size: 0.76rem;
-    gap: 6px;
+    font-size: 0.74rem;
+    gap: 5px;
     width: 100%;
-    padding: 0 4px;
+    min-width: 0;
+    padding: 0 2px;
+    box-sizing: border-box;
   }
 
-  /* Ícone fixo com largura idêntica para criar uma linha vertical reta de ícones */
+  /* Ícone fixo em 14px */
   .card-coluna li i {
-    font-size: 0.88rem;
-    width: 16px;
-    min-width: 16px;
+    font-size: 0.85rem;
+    width: 14px;
+    min-width: 14px;
     text-align: center;
     margin-top: 1px;
     flex-shrink: 0;
   }
 
-  /* Altura mínima padronizada para a profissão em 2 linhas (iguala a altura dos cards na mesma fileira) */
+  /* Altura padronizada para a profissão (iguala o tamanho dos dois cards lado a lado) */
   .item-profissao-destaque {
     font-weight: 600;
     color: #0284c7;
-    min-height: 34px;
-    line-height: 1.25;
+    min-height: 32px;
+    line-height: 1.2;
+    overflow: hidden;
   }
-  /* Oculta os textos longos de e-mail/telefone por extenso no mobile */
+
+  /* Esconde e-mails e telefones por extenso na visualização mobile */
   .coluna-contatos-desktop {
     display: none;
   }
 
-  /* Exibe a barra de botões coloridos de WhatsApp, E-mail e Redes no rodapé do cartão */
+  /* Barra de botões de contato com quebra flexível caso haja mais de 3 ícones */
   .card-acoes-mobile {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 6px;
-    margin-top: 8px;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin-top: 6px;
     padding-top: 6px;
     border-top: 1px dashed #e2e8f0;
     width: 100%;
   }
 
   .card-acoes-mobile .card-quick-btn {
-    width: 28px;
-    height: 28px;
-    font-size: 0.88rem;
+    width: 26px;
+    height: 26px;
+    font-size: 0.8rem;
   }
 
   .hero-content h1 {
     font-size: 1.7rem;
-  }
-}
-
-@media (max-width: 400px) {
-  .card-avatar {
-    width: 95px;
-    height: 95px;
-  }
-  .card-nome {
-    font-size: 0.9rem;
-  }
-  .card-dados li {
-    font-size: 0.8rem;
   }
 }
 
