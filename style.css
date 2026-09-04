@@ -1,0 +1,1200 @@
+/* ================= GERAL / RESET ================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body {
+  background-color: #f8fafc;
+  color: #0f172a;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ================= HEADER E NAVBAR ================= */
+.main-header {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand-logo {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #0f172a;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-logo i {
+  color: #0284c7;
+}
+
+.brand-logo span {
+  color: #0284c7;
+}
+
+.main-header .hamburger-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 1.85rem;
+  color: #0f172a;
+  cursor: pointer;
+  padding: 0;
+}
+
+.nav-menu {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.close-menu-btn {
+  display: none;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #475569;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: color 0.15s ease;
+}
+
+.nav-links a:hover {
+  color: #0284c7;
+}
+
+.btn-primary-publish {
+  background: #0284c7;
+  color: #ffffff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.92rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.btn-primary-publish:hover {
+  background: #0369a1;
+}
+
+.btn-primary-publish:active {
+  transform: scale(0.98);
+}
+
+/* ================= HERO SECTION ================= */
+.hero-section {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #ffffff;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.hero-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.hero-content h1 {
+  font-size: 2.3rem;
+  font-weight: 800;
+  line-height: 1.25;
+  margin-bottom: 16px;
+}
+
+.hero-content h1 span {
+  color: #38bdf8;
+}
+
+.hero-content p {
+  font-size: 1.05rem;
+  color: #cbd5e1;
+  margin-bottom: 28px;
+}
+
+.hero-actions {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+/* Container que alinha a barra de busca e o botão lado a lado no centro; quebra linha no celular se faltar espaço */
+.hero-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+/* Caixa branca da busca: define tamanho máximo, cantos arredondados, sombra e alinha os itens internos em linha */
+.hero-search-box {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 4px 14px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  gap: 10px;
+}
+
+/* Ícone de lupa dentro da busca: aplica a cor azul e define o tamanho da fonte */
+.hero-search-box i {
+  color: #0284c7;
+  font-size: 1.1rem;
+}
+
+/* Campo de texto: remove bordas padrão, ocupa todo o espaço livre da caixa e define a cor da digitação */
+.hero-search-box input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 0.95rem;
+  color: #0f172a;
+  background: transparent;
+  padding: 10px 0;
+}
+
+/* Texto de dica temporário (placeholder) do campo de busca: cor cinza clara */
+.hero-search-box input::placeholder {
+  color: #94a3b8;
+  font-size: 0.88rem;
+}
+
+/* Botão de 'X' para limpar busca: círculo cinza claro, centraliza o 'X' perfeitamente e não amassa (flex-shrink: 0) */
+.hero-search-clear {
+  background: #e2e8f0;
+  border: none;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  font-size: 0.75rem;
+  color: #475569;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+/* Efeito ao passar o mouse no 'X': fundo e texto escurecem para indicar que é clicável */
+.hero-search-clear:hover {
+  background: #cbd5e1;
+  color: #0f172a;
+}
+
+.btn-hero-secondary {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-hero-secondary:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+/* ================= VITRINE / GRADE DE CARDS ================= */
+.main-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 50px 20px;
+}
+
+.section-title {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.section-title h2 {
+  font-size: 1.9rem;
+  color: #0f172a;
+  font-weight: 800;
+}
+
+.section-title p {
+  color: #64748b;
+  font-size: 1rem;
+}
+
+.cards-grid {
+  display: grid;
+/* Dá espaço suficiente para acomodar profissões e e-mails longos sem apertar as colunas */
+  grid-template-columns: repeat(auto-fill, minmax(340px, 560px));
+  gap: 24px;
+  justify-content: center;
+}
+
+/* ================= O DESIGN DO CARD (REFERÊNCIA) ================= */
+/* ================= DESIGN COMPACTO DO CARD (HORIZONTAL 2 COLUNAS) ================= */
+
+/* Card principal: borda arredondada, sombra suave e espaçamento otimizado */
+.card-visita {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 14px 18px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  gap: 16px;
+  border: 1.5px solid #cbd5e1;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-visita:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.09);
+}
+
+/* Avatar circular do profissional */
+.card-avatar {
+  flex-shrink: 0;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid #f1f5f9;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.card-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Área de conteúdo ao lado do avatar */
+.card-info {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Tarja bege para destacar o nome */
+.card-header-nome {
+  background: #f4efe9;
+  padding: 4px 10px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  display: inline-block;
+  align-self: flex-start;
+  max-width: 100%;
+}
+
+.card-nome {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #7c583f;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+
+
+/* Duas colunas com proporção equilibrada (1.1fr para dados/profissão e 1.2fr para e-mail/contato) */
+.card-corpo-colunas {
+  display: grid;
+  grid-template-columns: 1.1fr 1.2fr;
+  gap: 16px;
+  align-items: start;
+  width: 100%;
+}
+
+/* Lista de cada coluna */
+.card-coluna {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Linha com ícone e texto */
+.card-coluna li {
+  display: flex;
+  align-items: flex-start; /* Alinha o ícone no topo caso o texto quebre em duas linhas */
+  gap: 8px;
+  font-size: 0.82rem;
+  color: #1e293b;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+/* Ícone alinhado perfeitamente com a primeira linha de texto */
+.card-coluna li i {
+  font-size: 0.95rem;
+  color: #0f172a;
+  width: 16px;
+  text-align: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Links de contato sem truncamento forçado */
+.card-coluna a {
+  color: inherit;
+  text-decoration: none;
+  font-size: 0.82rem;
+  word-break: break-word; /* Se o e-mail for excessivamente grande, quebra suavemente sem vazar */
+}
+
+.card-coluna a:hover {
+  color: #0284c7;
+  text-decoration: underline;
+}
+
+/* Permite que profissões extensas quebrem linha naturalmente em vez de cortar com reticências */
+.texto-cortado {
+  white-space: normal; /* Remove a trava de linha única */
+  word-break: normal;
+  display: inline;
+}
+
+
+/* Barra de botões de contato rápido */
+.card-social-links {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.card-quick-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: #f1f5f9;
+  color: #334155;
+  text-decoration: none;
+  font-size: 0.88rem;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.card-quick-btn:hover {
+  transform: translateY(-2px);
+}
+
+.card-quick-btn.zap {
+  background: #25d366;
+  color: #ffffff;
+}
+
+.card-quick-btn.mail {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+.card-quick-btn.insta {
+  background: #e1306c;
+  color: #ffffff;
+}
+
+.card-quick-btn.linkedin {
+  background: #0077b5;
+  color: #ffffff;
+}
+
+/* No desktop a barra mobile fica oculta */
+.card-acoes-mobile {
+  display: none;
+}
+
+
+
+
+/* ================= SEÇÕES INSTITUCIONAIS ================= */
+.section-container {
+  padding: 50px 20px;
+}
+
+.section-container.bg-alt {
+  background: #e2e8f0;
+}
+
+.section-box {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.section-box h2 {
+  font-size: 1.6rem;
+  margin-bottom: 12px;
+  color: #0f172a;
+}
+
+.text-center {
+  text-align: center;
+}
+
+
+
+/* ================= MODAL DE DIVULGAÇÃO ================= */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.modal-overlay.open {
+  display: flex;
+}
+
+.modal-card {
+  background: #ffffff;
+  width: 100%;
+  max-width: 480px;
+  border-radius: 20px;
+  padding: 26px;
+  position: relative;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  background: #f1f5f9;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: grid;
+  place-items: center;
+}
+
+.modal-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.modal-header i {
+  font-size: 2rem;
+  color: #0284c7;
+}
+
+.modal-header h3 {
+  font-size: 1.4rem;
+  color: #0f172a;
+  margin-top: 6px;
+}
+
+.modal-header p {
+  color: #64748b;
+  font-size: 0.88rem;
+}
+
+
+
+
+.btn-submit-publish {
+  background: #10b981;
+  color: #ffffff;
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: background 0.2s ease;
+}
+
+.btn-submit-publish:hover {
+  background: #059669;
+}
+
+/* ================= FOOTER ================= */
+.main-footer {
+  text-align: center;
+  padding: 24px;
+  background: #0f172a;
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+/* ================= RESPONSIVO MOBILE ================= */
+/* ================= MENU SUSPENSO MOBILE (TOP-DOWN) ================= */
+@media (max-width: 768px) {
+.main-header .hamburger-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1005;
+  }
+  /* Esconde o botão 'X' flutuante do modelo lateral antigo */
+  .close-menu-btn {
+    display: none !important;
+  }
+
+/* Menu recolhido no mobile: sem padding vertical, invisível e fora do fluxo de clique sem usar !important */
+  .main-header .nav-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    height: auto;
+    background: #ffffff;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0 24px;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+    border-bottom: 2px solid #e2e8f0;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-12px);
+    transition: max-height 0.5s cubic-bezier(0.25, 1, 0.5, 1), 
+                opacity 0.35s ease, 
+                transform 0.4s ease,
+                padding 0.4s ease,
+                visibility 0.4s;
+    z-index: 999;
+  }
+
+  /* Menu expandido: ganha visibilidade, padding completo e altura permitida */
+  .main-header .nav-menu.open {
+    max-height: 480px;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+    padding: 20px 24px 28px 24px;
+  }
+
+  .nav-links {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 0;
+    margin-bottom: 18px;
+  }
+
+  .nav-links li {
+    width: 100%;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .nav-links a {
+    display: block;
+    padding: 14px 4px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e293b;
+    width: 100%;
+  }
+
+  .btn-primary-publish {
+    width: 100%;
+    justify-content: center;
+    padding: 12px;
+    font-size: 1rem;
+  }
+
+  /* Backdrop suave abaixo do menu suspenso */
+  .menu-backdrop {
+    display: none;
+    position: fixed;
+    top: 60px; /* Começa abaixo do header */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(2px);
+    z-index: 998;
+  }
+
+  .menu-backdrop.open {
+    display: block;
+  }
+
+ /* Grid mobile em 2 colunas lado a lado com espaçamento enxuto */
+  .cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 0;
+  }
+
+  .main-content {
+    padding: 30px 10px;
+  }
+
+  /* Cartão verticalizado para telas menores */
+  .card-visita {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 12px 8px;
+    border-radius: 14px;
+    gap: 8px;
+  }
+
+  /* Avatar menor e centralizado no topo */
+  .card-avatar {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto;
+  }
+
+  .card-info {
+    width: 100%;
+    align-items: center;
+  }
+
+  /* Tarja com o nome centralizada e compacta */
+  .card-header-nome {
+    align-self: center;
+    padding: 3px 6px;
+    margin-bottom: 6px;
+    width: 100%;
+  }
+
+  .card-nome {
+    font-size: 0.78rem;
+    letter-spacing: 0.3px;
+  }
+
+  /* Transforma as colunas internas em bloco único vertical */
+  .card-corpo-colunas {
+    grid-template-columns: 1fr;
+    gap: 4px;
+    width: 100%;
+  }
+
+  .card-coluna {
+    gap: 4px;
+  }
+
+  .card-coluna li {
+    justify-content: center;
+    font-size: 0.75rem;
+    gap: 4px;
+  }
+
+  .card-coluna li i {
+    font-size: 0.8rem;
+    width: 14px;
+  }
+
+  /* Destaque para a profissão com altura controlada */
+  .item-profissao-destaque {
+    font-weight: 600;
+    color: #0284c7;
+    min-height: 32px;
+    align-items: center;
+  }
+
+  /* Oculta os textos longos de e-mail/telefone por extenso no mobile */
+  .coluna-contatos-desktop {
+    display: none;
+  }
+
+  /* Exibe a barra de botões coloridos de WhatsApp, E-mail e Redes no rodapé do cartão */
+  .card-acoes-mobile {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px dashed #e2e8f0;
+    width: 100%;
+  }
+
+  .card-acoes-mobile .card-quick-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 0.88rem;
+  }
+
+  .hero-content h1 {
+    font-size: 1.7rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .card-avatar {
+    width: 95px;
+    height: 95px;
+  }
+  .card-nome {
+    font-size: 0.9rem;
+  }
+  .card-dados li {
+    font-size: 0.8rem;
+  }
+}
+
+
+
+/* ================= NOVO UPLOAD ESTILIZADO DE FOTO ================= */
+
+
+.hidden-file-input {
+  display: none !important;
+}
+
+/* ================= LINHA DE REDES SOCIAIS NOS CARDS ================= */
+
+.card-social-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #334155;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.card-social-btn:hover {
+  transform: translateY(-2px);
+}
+
+.card-social-btn.insta:hover {
+  background: #e1306c;
+  color: #ffffff;
+}
+
+.card-social-btn.linkedin:hover {
+  background: #0077b5;
+  color: #ffffff;
+}
+
+.card-social-btn.web:hover {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+
+/* ================= NOVO ESTILO DO MODAL (IDÊNTICO À IMAGEM) ================= */
+
+/* Caixa tracejada do topo com cantos arredondados */
+.upload-dashed-box {
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 16px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: #ffffff;
+  margin-top: 8px;
+  margin-bottom: 12px;
+}
+
+.upload-avatar-circle {
+  width: 60px;
+  height: 60px;
+  min-width: 60px;
+  border-radius: 50%;
+  background: #eef2f6;
+  border: 2px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.upload-avatar-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.upload-avatar-circle i {
+  font-size: 1.5rem;
+  color: #64748b;
+}
+
+.btn-blue-choose {
+  background: #0284c7;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.92rem;
+  padding: 10px 18px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
+  transition: background 0.15s ease;
+}
+
+.btn-blue-choose:hover {
+  background: #0369a1;
+}
+
+/* Lista de campos com linhas divisórias */
+.publish-form-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-row-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 4px;
+  border-bottom: 1px solid #edf2f7; /* Linha horizontal sutil */
+}
+
+/* Ícone quadrado com fundo suave */
+.row-icon-box {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  background: #f1f4f9;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1e293b;
+  font-size: 1.25rem;
+}
+
+/* Coluna de texto e campo sem bordas quadradas */
+.row-input-wrap {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  text-align: left;
+}
+
+.row-input-wrap label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 2px;
+}
+
+.row-input-wrap input {
+  border: none;
+  background: transparent;
+  padding: 4px 0;
+  font-size: 0.95rem;
+  color: #0f172a;
+  outline: none;
+  width: 100%;
+}
+
+.row-input-wrap input::placeholder {
+  color: #94a3b8;
+  font-weight: 400;
+  font-size: 0.88rem;
+}
+
+.row-input-wrap input:focus {
+  border: none;
+  outline: none;
+}
+
+/* ================= PAGINAÇÃO ESTILO REFERÊNCIA ================= */
+.pagination-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 45px;
+  flex-wrap: wrap;
+}
+
+/* Botões ANTERIOR e PRÓXIMA (pretos e ovais) */
+.pagination-btn.nav-btn {
+  background: #232323;
+  color: #ffffff;
+  border: none;
+  border-radius: 50px;
+  padding: 10px 22px;
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.pagination-btn.nav-btn:hover {
+  background: #111111;
+  transform: translateY(-1px);
+}
+
+.pagination-btn.nav-btn:active {
+  transform: scale(0.97);
+}
+
+/* Seta amarela destacada */
+.pagination-btn.nav-btn i {
+  color: #f59e0b;
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+/* Lista de Números */
+.pagination-pages {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.page-num {
+  background: transparent;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1e293b;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.page-num:hover:not(.active) {
+  background: #e2e8f0;
+}
+
+/* Página Selecionada (Bolinha cinza da imagem) */
+.page-num.active {
+  background: #d8dcd8;
+  color: #0f172a;
+  cursor: default;
+}
+
+/* Ajustes no mobile para não amontoar */
+/* ================= PAGINAÇÃO RESPONSIVA PARA QUALQUER MOBILE ================= */
+@media (max-width: 520px) {
+  .pagination-container {
+    gap: 6px;
+    padding: 0 10px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .pagination-pages {
+    gap: 4px;
+  }
+
+  /* Redução equilibrada das bolinhas dos números */
+  .page-num {
+    width: 28px;
+    height: 28px;
+    font-size: 0.82rem;
+  }
+
+  /* Botões anterior/próxima adaptados para mobile */
+  .pagination-btn.nav-btn {
+    padding: 7px 12px;
+    font-size: 0.72rem;
+    gap: 4px;
+    white-space: nowrap;
+  }
+
+  .pagination-btn.nav-btn i {
+    font-size: 0.85rem;
+  }
+}
+
+/* Telas ultra-estreitas (até 360px) */
+@media (max-width: 360px) {
+  .pagination-container {
+    gap: 4px;
+  }
+
+  .pagination-pages {
+    gap: 2px;
+  }
+
+  .page-num {
+    width: 26px;
+    height: 26px;
+    font-size: 0.75rem;
+  }
+
+  .pagination-btn.nav-btn {
+    padding: 6px 10px;
+    font-size: 0.68rem;
+  }
+}
+
+/* ================= ACCORDION DE CIDADES ================= */
+.accordion-item-city {
+  align-items: flex-start !important;
+}
+
+.city-accordion-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  width: 100%;
+}
+
+.city-accordion-header input {
+  cursor: pointer;
+}
+
+.accordion-arrow {
+  color: #64748b;
+  font-size: 0.85rem;
+  transition: transform 0.25s ease;
+  pointer-events: none;
+}
+
+.accordion-arrow.open {
+  transform: rotate(180deg);
+}
+
+.city-accordion-drawer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+}
+
+.city-accordion-drawer.open {
+  max-height: 180px;
+  overflow-y: auto;
+  margin-top: 8px;
+  border-top: 1px dashed #e2e8f0;
+  overscroll-behavior: contain; /* Trava o scroll 100% dentro da lista */
+}
+
+.city-list-wrapper {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 0;
+}
+
+.city-option {
+  text-align: left;
+  background: transparent;
+  border: none;
+  padding: 8px 10px;
+  font-size: 0.88rem;
+  color: #334155;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.city-option:hover {
+  background: #e2e8f0;
+  color: #0284c7;
+  font-weight: 600;
+}
+
+/* ================= SHOW TOAST NOTIFICATION ================= */
+.toast-notification {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #0f172a;
+  color: #ffffff;
+  padding: 14px 20px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 3000;
+  border-left: 4px solid #ef4444; /* Borda vermelha de atenção */
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(20px);
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  max-width: 90vw;
+}
+
+.toast-notification.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.toast-icon {
+  font-size: 1.25rem;
+  color: #ef4444;
+  flex-shrink: 0;
+}
+
+.toast-message {
+  font-size: 0.92rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+@media (max-width: 480px) {
+  .toast-notification {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+  }
+}
