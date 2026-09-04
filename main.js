@@ -210,7 +210,7 @@ function mascararEmail(em) {
   return `${pedaco}...`;
 }
 
-export function criarCardVisitaHTML({ nome, idade, cidade, profissao, email, telefone, fotoUrl, instagram, linkedin }) {
+export function criarCardVisitaHTML({ nome, experiencia, idade, cidade, profissao, email, telefone, fotoUrl, instagram, linkedin }) {
   const telNumeros = telefone.replace(/\D/g, "");
   const zapLink = telNumeros.length >= 10 ? `https://wa.me/55${telNumeros}` : `tel:${telNumeros}`;
   const mailLink = `mailto:${email}`;
@@ -218,6 +218,9 @@ export function criarCardVisitaHTML({ nome, idade, cidade, profissao, email, tel
   const telMascara = mascararTelefone(telefone);
   const emailMascara = mascararEmail(email);
 
+// Se for card antigo com 'idade', usa como fallback; se for novo, usa 'experiencia'
+  const expValor = experiencia !== undefined ? experiencia : idade;
+  const textoExp = expValor == 1 ? "1 ano exp." : `${expValor} anos exp.`;
   // Redes Sociais opcionais
   let instaLink = "";
   if (instagram) {
@@ -250,11 +253,11 @@ export function criarCardVisitaHTML({ nome, idade, cidade, profissao, email, tel
             <span>${profissao}</span>
           </div>
 
-          <div class="card-linha-discreta">
+         <div class="card-linha-discreta">
             <i class="bi bi-geo-alt-fill"></i>
-            <span>${cidade}</span>
+            <span class="cidade-texto" title="${cidade}">${cidade}</span>
             <span class="separador-bullet">•</span>
-            <span>${idade} anos</span>
+            <span class="exp-destaque">${textoExp}</span>
           </div>
         </div>
       </div>
@@ -388,9 +391,9 @@ carregarCardsSalvos();
 publishForm?.addEventListener("submit", (e) => {
   e.preventDefault();
 
-  const fotoArquivo = document.getElementById("fotoInput").files[0];
+const fotoArquivo = document.getElementById("fotoInput").files[0];
   const nome = document.getElementById("nomeInput").value.trim();
-  const idade = document.getElementById("idadeInput").value.trim();
+  const experiencia = document.getElementById("experienciaInput").value.trim();
   const cidade = document.getElementById("cidadeInput").value.trim();
   const profissao = document.getElementById("profissaoInput").value.trim();
   const email = document.getElementById("emailInput").value.trim();
@@ -415,7 +418,7 @@ publishForm?.addEventListener("submit", (e) => {
   redimensionarFoto(fotoArquivo, (fotoUrl) => {
     const dadosNovoProfissional = {
       nome,
-      idade,
+      experiencia,
       cidade,
       profissao,
       email,
