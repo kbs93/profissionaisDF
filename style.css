@@ -723,25 +723,35 @@ body {
     gap: 4px;
   }
 
+/* Alinha os itens à esquerda com largura total, garantindo os ícones perfeitamente empilhados na mesma coluna */
   .card-coluna li {
-    justify-content: center;
-    font-size: 0.75rem;
-    gap: 4px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    text-align: left;
+    font-size: 0.76rem;
+    gap: 6px;
+    width: 100%;
+    padding: 0 4px;
   }
 
+  /* Ícone fixo com largura idêntica para criar uma linha vertical reta de ícones */
   .card-coluna li i {
-    font-size: 0.8rem;
-    width: 14px;
+    font-size: 0.88rem;
+    width: 16px;
+    min-width: 16px;
+    text-align: center;
+    margin-top: 1px;
+    flex-shrink: 0;
   }
 
-  /* Destaque para a profissão com altura controlada */
+  /* Altura mínima padronizada para a profissão em 2 linhas (iguala a altura dos cards na mesma fileira) */
   .item-profissao-destaque {
     font-weight: 600;
     color: #0284c7;
-    min-height: 32px;
-    align-items: center;
+    min-height: 34px;
+    line-height: 1.25;
   }
-
   /* Oculta os textos longos de e-mail/telefone por extenso no mobile */
   .coluna-contatos-desktop {
     display: none;
