@@ -181,6 +181,16 @@
             </div>
           </div>
         </div>
+        <!-- Campo Mini Bio / Resumo dos Serviços -->
+        <div class="input-row-item">
+          <div class="row-icon-box">
+            <i class="bi bi-chat-left-text"></i>
+          </div>
+          <div class="row-input-wrap">
+            <label for="bioInput">Resumo dos Serviços (Mini Bio)</label>
+            <input type="text" id="bioInput" placeholder="Ex: Projetos residenciais, reformas e consultoria rápida." maxlength="120">
+          </div>
+        </div>
 
         <div class="input-row-item">
           <div class="row-icon-box">
@@ -229,44 +239,61 @@
     </div>
   </div>
   <!-- ================= MODAL DE CADASTRO COM E-MAIL ================= -->
+
 <!-- ================= MODAL DE CADASTRO COM E-MAIL ================= -->
-<div class="modal-overlay" id="registerModal">
-  <div class="modal-card">
-    <button class="modal-close-btn" id="closeRegisterModalBtn" aria-label="Fechar">✕</button>
-    
-    <div class="modal-header">
-      <i class="bi bi-person-check-fill"></i>
-      <h3>Crie sua Conta Profissional</h3>
-      <p>Faça parte do maior diretório de profissionais do DF. Receba contatos diretos no seu celular.</p>
+<!-- ================= MODAL ÚNICO GLOBAL (CARTÃO DE VISITA COMPLETO) ================= -->
+  <div class="modal-overlay" id="cartaoModal">
+    <div class="modal-card modal-cartao-detalhe">
+      <button class="modal-close-btn" id="closeCartaoModalBtn" aria-label="Fechar Cartão">✕</button>
+      
+      <div class="cartao-modal-corpo">
+        <div class="cartao-modal-avatar">
+          <img id="modalFoto" src="" alt="Foto Profissional">
+        </div>
+        
+        <h3 id="modalNome" class="cartao-modal-nome"></h3>
+        
+        <div class="cartao-modal-profissao">
+          <i class="bi bi-person-workspace"></i>
+          <span id="modalProfissao"></span>
+        </div>
+
+   <div class="cartao-modal-info-linha">
+          <i class="bi bi-geo-alt-fill"></i>
+          <span id="modalCidade"></span>
+          <span class="separador-bullet">•</span>
+          <span id="modalExp"></span>
+        </div>
+
+        <!-- Mini Bio / Resumo exibido no Modal -->
+        <p id="modalBio" class="cartao-modal-bio" style="display: none;"></p>
+
+      <!-- Botão compacto de WhatsApp -->
+
+      <!-- Botão compacto de WhatsApp -->
+        <a href="#" id="modalZapLink" target="_blank" rel="noopener noreferrer" class="btn-modal-zap-compacto">
+          <i class="bi bi-whatsapp"></i> Chamar no WhatsApp
+        </a>
+
+        <!-- Linha com os canais padronizados no mesmo formato e tamanho -->
+        <div class="cartao-modal-contatos-grid">
+          <a href="#" id="modalMailLink" class="btn-contato-quadrado mail" title="Enviar E-mail">
+            <i class="bi bi-envelope-fill"></i>
+          </a>
+          <a href="#" id="modalInstaLink" target="_blank" rel="noopener noreferrer" class="btn-contato-quadrado insta" title="Instagram" style="display: none;">
+            <i class="bi bi-instagram"></i>
+          </a>
+          <a href="#" id="modalLinkedinLink" target="_blank" rel="noopener noreferrer" class="btn-contato-quadrado linkedin" title="LinkedIn" style="display: none;">
+            <i class="bi bi-linkedin"></i>
+          </a>
+        </div>
+
+      </div>
     </div>
-
-    <form id="registerForm" class="publish-form-list">
-      <div class="input-row-item">
-        <div class="row-icon-box">
-          <i class="bi bi-envelope"></i>
-        </div>
-        <div class="row-input-wrap">
-          <label for="regEmailInput">Seu melhor E-mail</label>
-          <input type="email" id="regEmailInput" placeholder="exemplo@email.com" required>
-        </div>
-      </div>
-
-      <div class="input-row-item">
-        <div class="row-icon-box">
-          <i class="bi bi-shield-lock"></i>
-        </div>
-        <div class="row-input-wrap">
-          <label for="regSenhaInput">Criar Senha</label>
-          <input type="password" id="regSenhaInput" placeholder="Mínimo 6 dígitos" required minlength="6">
-        </div>
-      </div>
-
-      <button type="submit" class="btn-submit-publish" style="margin-top: 20px;">
-        Cadastrar com E-mail
-      </button>
-    </form>
   </div>
-</div>
+
+
+
 
   <!-- Rodapé -->
  <footer class="main-footer">

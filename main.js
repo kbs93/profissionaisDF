@@ -192,52 +192,48 @@ cityListWrapper?.addEventListener("click", (e) => {
 });
 
 // --- CONTROLE DO ACCORDION DE PROFISSÕES ---
-// Funções auxiliares para gerar a máscara inicial
-// Exibe somente os 3 primeiros dígitos do telefone sem caracteres extras
-function mascararTelefone(tel) {
-  const nums = tel.replace(/\D/g, "");
-  // Remove o DDD 61 caso esteja no início
-  const semDDD = nums.startsWith("61") ? nums.slice(2) : nums;
-  const tresPrimeiros = semDDD.slice(0, 3);
-  return `(61) ${tresPrimeiros}...`;
+const profissaoAccordionHeader = document.getElementById("profissaoAccordionHeader");
+const profissaoAccordionDrawer = document.getElementById("profissaoAccordionDrawer");
+const profissaoArrowIcon = document.getElementById("profissaoArrowIcon");
+const profissaoInput = document.getElementById("profissaoInput");
+const profissaoListWrapper = document.getElementById("profissaoListWrapper");
+
+export function toggleProfissaoAccordion(forceClose = false) {
+  const isOpen = forceClose ? false : !profissaoAccordionDrawer?.classList.contains("open");
+  profissaoAccordionDrawer?.classList.toggle("open", isOpen);
+  profissaoArrowIcon?.classList.toggle("open", isOpen);
 }
 
-// Exibe somente um pedaço inicial do e-mail sem mostrar o restante
-function mascararEmail(em) {
-  const partes = em.split("@");
-  const user = partes[0] || "";
-  const pedaco = user.slice(0, 9);
-  return `${pedaco}...`;
+if (profissaoListWrapper) {
+  profissaoListWrapper.innerHTML = PROFISSOES_LISTA.map(
+    (prof) => `<button type="button" class="city-option">${prof}</button>`
+  ).join("");
 }
 
-export function criarCardVisitaHTML({ nome, experiencia, idade, cidade, profissao, email, telefone, fotoUrl, instagram, linkedin }) {
-  const telNumeros = telefone.replace(/\D/g, "");
-  const zapLink = telNumeros.length >= 10 ? `https://wa.me/55${telNumeros}` : `tel:${telNumeros}`;
-  const mailLink = `mailto:${email}`;
+profissaoAccordionHeader?.addEventListener("click", () => {
+  toggleCityAccordion(true); // fecha cidade se abrir profissões
+  toggleProfissaoAccordion();
+});
 
-  const telMascara = mascararTelefone(telefone);
-  const emailMascara = mascararEmail(email);
+profissaoListWrapper?.addEventListener("click", (e) => {
+  const btn = e.target.closest(".city-option");
+  if (!btn) return;
+  e.stopPropagation();
+  if (profissaoInput) profissaoInput.value = btn.textContent.trim();
+  toggleProfissaoAccordion(true);
+});
 
-// Se for card antigo com 'idade', usa como fallback; se for novo, usa 'experiencia'
+
+
+
+// --- FUNÇÃO PARA GERAR O HTML DO CARD DE VISITA ---
+export function criarCardVisitaHTML({ nome, experiencia, idade, cidade, profissao, bio, email, telefone, fotoUrl, instagram, linkedin }) {
   const expValor = experiencia !== undefined ? experiencia : idade;
   const textoExp = expValor == 1 ? "1 ano exp." : `${expValor} anos exp.`;
-  // Redes Sociais opcionais
-  let instaLink = "";
-  if (instagram) {
-    const userInsta = instagram.replace("@", "").trim();
-    instaLink = `<a href="https://instagram.com/${userInsta}" target="_blank" rel="noopener noreferrer" class="card-social-btn insta" title="Instagram @${userInsta}"><i class="bi bi-instagram"></i></a>`;
-  }
-
-  let linkedinLink = "";
-  if (linkedin) {
-    const isUrl = linkedin.startsWith("http");
-    const fullLink = isUrl ? linkedin : `https://${linkedin}`;
-    linkedinLink = `<a href="${fullLink}" target="_blank" rel="noopener noreferrer" class="card-social-btn linkedin" title="LinkedIn"><i class="bi bi-linkedin"></i></a>`;
-  }
+  const miniBio = bio || "";
 
   return `
     <div class="card-visita">
-      <!-- ÁREA DE PERFIL (ESQUERDA: IDENTIDADE) -->
       <div class="card-perfil-col">
         <div class="card-avatar">
           <img src="${fotoUrl}" alt="${nome}" onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=300'">
@@ -253,49 +249,38 @@ export function criarCardVisitaHTML({ nome, experiencia, idade, cidade, profissa
             <span>${profissao}</span>
           </div>
 
-         <div class="card-linha-discreta">
+          <div class="card-linha-discreta">
             <i class="bi bi-geo-alt-fill"></i>
             <span class="cidade-texto" title="${cidade}">${cidade}</span>
             <span class="separador-bullet">•</span>
             <span class="exp-destaque">${textoExp}</span>
           </div>
-        </div>
-      </div>
 
-      <!-- ÁREA DE AÇÃO (DIREITA: CONVERSÃO DIRETA COM REVELAÇÃO) -->
-      <div class="card-conversao-col">
-        <div class="card-contatos-lista">
-          <!-- Telefone Mascarado -->
+          <!-- BOTÃO VER MAIS LOGO ABAIXO DA CIDADE E EXP -->
           <button type="button" 
-                  class="btn-revelar-contato zap-revelar" 
-                  data-real="${telefone}" 
-                  data-link="${zapLink}" 
-                  title="Clique para ver o telefone e chamar no WhatsApp">
-            <i class="bi bi-whatsapp"></i>
-            <span class="contato-texto">${telMascara}</span>
-            <span class="tag-olx-ver">Ver</span>
+                  class="btn-abrir-cartao" 
+                  data-nome="${nome}"
+                  data-profissao="${profissao}"
+                  data-bio="${miniBio}"
+                  data-cidade="${cidade}"
+                  data-exp="${textoExp}"
+                  data-foto="${fotoUrl}"
+                  data-telefone="${telefone}"
+                  data-email="${email}"
+                  data-instagram="${instagram || ''}"
+                  data-linkedin="${linkedin || ''}">
+            <i class="bi bi-person-vcard-fill"></i> Ver mais
           </button>
-
-          <!-- E-mail Mascarado -->
-          <button type="button" 
-                  class="btn-revelar-contato mail-revelar" 
-                  data-real="${email}" 
-                  data-link="${mailLink}" 
-                  title="Clique para ver o e-mail completo">
-            <i class="bi bi-envelope-fill"></i>
-            <span class="contato-texto">${emailMascara}</span>
-            <span class="tag-olx-ver">Ver</span>
-          </button>
-        </div>
-
-        <div class="card-rodape-social">
-          ${instaLink}
-          ${linkedinLink}
         </div>
       </div>
     </div>
   `;
 }
+
+
+
+
+
 
 
 
@@ -395,7 +380,8 @@ const fotoArquivo = document.getElementById("fotoInput").files[0];
   const nome = document.getElementById("nomeInput").value.trim();
   const experiencia = document.getElementById("experienciaInput").value.trim();
   const cidade = document.getElementById("cidadeInput").value.trim();
-  const profissao = document.getElementById("profissaoInput").value.trim();
+ const profissao = document.getElementById("profissaoInput").value.trim();
+  const bio = document.getElementById("bioInput")?.value.trim() || "";
   const email = document.getElementById("emailInput").value.trim();
   const telefone = document.getElementById("telefoneInput").value.trim();
   const instagram = document.getElementById("instagramInput")?.value.trim() || "";
@@ -416,11 +402,12 @@ const fotoArquivo = document.getElementById("fotoInput").files[0];
 
   // Compacta e processa a imagem
   redimensionarFoto(fotoArquivo, (fotoUrl) => {
-    const dadosNovoProfissional = {
+const dadosNovoProfissional = {
       nome,
       experiencia,
       cidade,
       profissao,
+      bio,
       email,
       telefone,
       fotoUrl,
@@ -508,6 +495,8 @@ function normalizarTexto(txt) {
 
 
 // --- SISTEMA DE FILTRO UNIFICADO: PROFISSÃO E CIDADE/RA (DF) ---
+
+// --- SISTEMA DE FILTRO UNIFICADO: NOME, PROFISSÃO E CIDADE (DF) ---
 function filtrarCardsVitrine() {
   // 1. Obtém o que o usuário digitou e limpa acentos e letras maiúsculas
   const termo = normalizarTexto(filtroProfissaoInput?.value || "");
@@ -522,43 +511,70 @@ function filtrarCardsVitrine() {
 
   let encontrados = 0;
 
-  // 4. Percorre cada cartão na vitrine para comparar profissão e cidade
+  // 4. Percorre cada cartão na vitrine comparando Nome, Profissão e Cidade
   todosCards?.forEach((card) => {
-    // Captura o texto do item de profissão através do ícone da maleta/trabalho
-    const itemProfissao = card.querySelector(".bi-person-workspace")?.parentElement;
-    const profissaoTexto = itemProfissao ? itemProfissao.textContent : "";
+    const nomeTexto = card.querySelector(".card-nome")?.textContent || "";
+    const profissaoTexto = card.querySelector(".card-profissao-destaque")?.textContent || "";
+    const cidadeTexto = card.querySelector(".cidade-texto")?.textContent || "";
 
-    // Captura o texto do item de cidade através do ícone de localização geográfica
-    const itemCidade = card.querySelector(".bi-geo-alt-fill")?.parentElement;
-    const cidadeTexto = itemCidade ? itemCidade.textContent : "";
-
-    // Valida se o termo digitado está presente na Profissão OU na Cidade do DF
+    // Valida se o termo digitado bate com Nome, Profissão OU Cidade
+    const bateuNome = normalizarTexto(nomeTexto).includes(termo);
     const bateuProfissao = normalizarTexto(profissaoTexto).includes(termo);
     const bateuCidade = normalizarTexto(cidadeTexto).includes(termo);
 
-    // Se o termo digitado casar com qualquer um dos dois, o card continua visível
-    if (bateuProfissao || bateuCidade) {
-      card.style.display = "flex";
+    if (bateuNome || bateuProfissao || bateuCidade) {
+      card.style.display = ""; // Mantém o display original do CSS sem quebrar a grade
       encontrados++;
     } else {
       card.style.display = "none";
     }
   });
 
-  // 5. Feedback visual amigável quando nenhum resultado bate com os termos pesquisados
+  // 5. Mensagem amigável caso não encontre nenhum resultado
   let feedbackVazio = document.getElementById("buscaSemResultados");
   if (encontrados === 0) {
     if (!feedbackVazio && cardsGrid) {
       feedbackVazio = document.createElement("p");
       feedbackVazio.id = "buscaSemResultados";
       feedbackVazio.style.cssText = "grid-column: 1 / -1; text-align: center; color: #64748b; font-size: 1.05rem; padding: 40px 0;";
-      feedbackVazio.textContent = "Nenhum profissional encontrado para esta profissão ou região.";
+      feedbackVazio.textContent = "Nenhum profissional encontrado para esta busca.";
       cardsGrid.appendChild(feedbackVazio);
     }
   } else if (feedbackVazio) {
     feedbackVazio.remove();
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // Filtra automaticamente conforme o usuário digita
@@ -575,28 +591,111 @@ limparBuscaBtn?.addEventListener("click", () => {
   }
 });
 
-// --- EVENTO DE REVELAÇÃO DE CONTATO ESTILO OLX / MERCADO LIVRE ---
+// --- CONTROLE DO MODAL ÚNICO DO CARTÃO DE VISITA ---
+const cartaoModal = document.getElementById("cartaoModal");
+const closeCartaoModalBtn = document.getElementById("closeCartaoModalBtn");
+
+function toggleCartaoModal(isOpen) {
+  cartaoModal?.classList.toggle("open", isOpen);
+  document.body.style.overflow = isOpen ? "hidden" : "";
+}
+
+closeCartaoModalBtn?.addEventListener("click", () => toggleCartaoModal(false));
+
+cartaoModal?.addEventListener("click", (e) => {
+  if (e.target === cartaoModal) toggleCartaoModal(false);
+});
+
+// Delegação de evento: clique em "Ver Cartão" abre o modal preenchendo os dados
 cardsGrid?.addEventListener("click", (e) => {
-  const btnRevelar = e.target.closest(".btn-revelar-contato");
-  if (!btnRevelar) return;
+  const btn = e.target.closest(".btn-abrir-cartao");
+  if (!btn) return;
 
-  const jaRevelado = btnRevelar.classList.contains("revelado");
-  const dadoReal = btnRevelar.getAttribute("data-real");
-  const linkReal = btnRevelar.getAttribute("data-link");
+const nome = btn.getAttribute("data-nome");
+  const profissao = btn.getAttribute("data-profissao");
+  const bio = btn.getAttribute("data-bio") || "";
+  const cidade = btn.getAttribute("data-cidade");
+  const exp = btn.getAttribute("data-exp");
+  const foto = btn.getAttribute("data-foto");
+  const telefone = btn.getAttribute("data-telefone") || "";
+  const email = btn.getAttribute("data-email") || "";
+  const instagram = btn.getAttribute("data-instagram") || "";
+  const linkedin = btn.getAttribute("data-linkedin") || "";
 
-  if (!jaRevelado) {
-    // 1º Clique: Revela o dado real e muda o estilo visual
-    btnRevelar.classList.add("revelado");
-    const spanTexto = btnRevelar.querySelector(".contato-texto");
-    if (spanTexto) spanTexto.textContent = dadoReal;
+  // Preenche elementos do modal
+  document.getElementById("modalFoto").src = foto;
+document.getElementById("modalProfissao").textContent = profissao;
+  document.getElementById("modalCidade").textContent = cidade;
+  document.getElementById("modalExp").textContent = exp;
 
-    // Remove a etiquetinha "Ver"
-    const tagVer = btnRevelar.querySelector(".tag-olx-ver");
-    if (tagVer) tagVer.remove();
-  } else {
-    // 2º Clique: Redireciona diretamente para o WhatsApp ou abre o cliente de E-mail
-    if (linkReal) {
-      window.open(linkReal, "_blank");
+  // Preenchimento e exibição condicional da Mini Bio
+  const modalBio = document.getElementById("modalBio");
+  if (modalBio) {
+    if (bio) {
+      modalBio.textContent = bio;
+      modalBio.style.display = "block";
+    } else {
+      modalBio.textContent = "";
+      modalBio.style.display = "none";
     }
   }
+
+  // Converte o nome para caixa mista elegante (Ex: Ana Beatriz Silva da Costa)
+  // Converte o nome para caixa mista elegante (Ex: Ana Beatriz Silva da Costa)
+  const formatarNomeMisto = (str) => {
+    const conectivos = ["de", "da", "do", "das", "dos", "e"];
+    return str
+      .toLowerCase()
+      .split(" ")
+      .filter(palavra => palavra.length > 0)
+      .map((palavra, index) => {
+        if (index > 0 && conectivos.includes(palavra)) return palavra;
+        return palavra.charAt(0).toUpperCase() + palavra.slice(1);
+      })
+      .join(" ");
+  };
+
+  document.getElementById("modalNome").textContent = formatarNomeMisto(nome);
+
+  // WhatsApp link
+  const zapNums = telefone.replace(/\D/g, "");
+  const zapHref = zapNums.length >= 10 ? `https://wa.me/55${zapNums}` : `tel:${zapNums}`;
+  const modalZapLink = document.getElementById("modalZapLink");
+  if (modalZapLink) modalZapLink.href = zapHref;
+
+  // E-mail link
+// E-mail link
+  const modalMailLink = document.getElementById("modalMailLink");
+  if (modalMailLink) {
+    if (email) {
+      modalMailLink.href = `mailto:${email}`;
+      modalMailLink.style.display = "inline-flex";
+    } else {
+      modalMailLink.style.display = "none";
+    }
+  }
+
+  // Redes Sociais
+  const instaBtn = document.getElementById("modalInstaLink");
+  if (instaBtn) {
+    if (instagram) {
+      const userInsta = instagram.replace("@", "").trim();
+      instaBtn.href = `https://instagram.com/${userInsta}`;
+      instaBtn.style.display = "inline-flex";
+    } else {
+      instaBtn.style.display = "none";
+    }
+  }
+
+  const linkedinBtn = document.getElementById("modalLinkedinLink");
+  if (linkedinBtn) {
+    if (linkedin) {
+      linkedinBtn.href = linkedin.startsWith("http") ? linkedin : `https://${linkedin}`;
+      linkedinBtn.style.display = "inline-flex";
+    } else {
+      linkedinBtn.style.display = "none";
+    }
+  }
+
+  toggleCartaoModal(true);
 });
