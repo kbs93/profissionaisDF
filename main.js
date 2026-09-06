@@ -10,21 +10,16 @@ const menuBackdrop = document.getElementById("menuBackdrop");
 // Função que abre/fecha o menu mobile via clique
 function toggleMenu(forceClose = false) {
   const isOpen = forceClose ? false : !navMenu?.classList.contains("open");
-
   navMenu?.classList.toggle("open", isOpen);
   menuBackdrop?.classList.toggle("open", isOpen);
-
   // Troca o ícone: se aberto vira "X", se fechado vira "três traços"
   const icon = hamburgerBtn?.querySelector("i");
   if (icon) {
     icon.className = isOpen ? "bi bi-x-lg" : "bi bi-list";
   }
 }
-
 // Força o menu mobile e o backdrop a iniciarem 100% fechados ao carregar a página
 toggleMenu(true);
-
-
 // --- SISTEMA DE TOAST NOTIFICATION ---
 const toastNotification = document.getElementById("toastNotification");
 const toastMessage = document.getElementById("toastMessage");
@@ -41,14 +36,6 @@ export function showToast(mensagem) {
     toastNotification.classList.remove("show");
   }, 3200);
 }
-
-
-
-
-
-
-
-
 // Ao clicar no botão (seja hambúrguer ou o X), abre ou fecha
 hamburgerBtn?.addEventListener("click", (e) => {
   e.stopPropagation();
@@ -120,9 +107,9 @@ fotoInput?.addEventListener("change", (e) => {
 export const CIDADES_DF = [
   "Águas Claras", "Arniqueira", "Asa Norte", "Asa Sul", "Brazlândia", "Candangolândia", "Ceilândia", "Cruzeiro", "Fercal", "Gama",
   "Guará", "Guará II", "Itapoã", "Jardim Botânico", "Lago Norte", "Lago Sul", "Núcleo Bandeirante", "Paranoá", "Park Way", "Planaltina",
-  "Plano Piloto", "Recanto das Emas", "Riacho Fundo", "Riacho Fundo II", "Samambaia N", "Samambaia S", "Santa Maria", "São Sebastião",
-  "Estrutural", "SIA", "Sobradinho", "Sobradinho II", "Sol Nascente", "Pôr do Sol", "Sudoeste", "Octogonal", "Taguatinga", "Taguatinga N",
-  "Taguatinga S", "Varjão", "Vicente Pires"
+  "Plano Piloto", "Recanto das Emas", "Riacho Fundo", "Riacho Fundo II", "Samambaia Norte", "Samambaia Sul", "Santa Maria", "São Sebastião",
+  "Estrutural", "SIA", "Sobradinho", "Sobradinho II", "Sol Nascente", "Pôr do Sol", "Sudoeste", "Octogonal", "Taguatinga", "Taguatinga Norte",
+  "Taguatinga Sul", "Varjão", "Vicente Pires"
 ];
 
 export const PROFISSOES_LISTA = [
@@ -159,6 +146,14 @@ export const PROFISSOES_LISTA = [
  "Outros Serviços"
 ];
 
+export const CNH_MOBILIDADE_LISTA = [
+  "CNH Categoria B ",
+  "CNH Categoria A ",
+  "CNH Categoria AB",
+  "CNH Categoria C/D/E",
+  "Transporte Público"
+];
+
 // --- CONTROLE DO ACCORDION DE CIDADES (DF) -------------------------------
 const cityAccordionHeader = document.getElementById("cityAccordionHeader");
 const cityAccordionDrawer = document.getElementById("cityAccordionDrawer");
@@ -178,11 +173,7 @@ if (cityListWrapper) {
   ).join("");
 }
 
-cityAccordionHeader?.addEventListener("click", () => {
-  toggleProfissaoAccordion(true); // fecha profissões se abrir cidade
-  toggleCityAccordion();
-});
-
+// --- SELEÇÃO DE CIDADE ---
 cityListWrapper?.addEventListener("click", (e) => {
   const btn = e.target.closest(".city-option");
   if (!btn) return;
@@ -210,11 +201,6 @@ if (profissaoListWrapper) {
   ).join("");
 }
 
-profissaoAccordionHeader?.addEventListener("click", () => {
-  toggleCityAccordion(true); // fecha cidade se abrir profissões
-  toggleProfissaoAccordion();
-});
-
 profissaoListWrapper?.addEventListener("click", (e) => {
   const btn = e.target.closest(".city-option");
   if (!btn) return;
@@ -223,14 +209,58 @@ profissaoListWrapper?.addEventListener("click", (e) => {
   toggleProfissaoAccordion(true);
 });
 
+// --- CONTROLE DO ACCORDION DE HABILITAÇÃO / MOBILIDADE ---
+const cnhAccordionHeader = document.getElementById("cnhAccordionHeader");
+const cnhAccordionDrawer = document.getElementById("cnhAccordionDrawer");
+const cnhArrowIcon = document.getElementById("cnhArrowIcon");
+const cnhInput = document.getElementById("cnhInput");
+const cnhListWrapper = document.getElementById("cnhListWrapper");
 
+export function toggleCnhAccordion(forceClose = false) {
+  const isOpen = forceClose ? false : !cnhAccordionDrawer?.classList.contains("open");
+  cnhAccordionDrawer?.classList.toggle("open", isOpen);
+  cnhArrowIcon?.classList.toggle("open", isOpen);
+}
 
+if (cnhListWrapper) {
+  cnhListWrapper.innerHTML = CNH_MOBILIDADE_LISTA.map(
+    (item) => `<button type="button" class="city-option">${item}</button>`
+  ).join("");
+}
+
+cnhListWrapper?.addEventListener("click", (e) => {
+  const btn = e.target.closest(".city-option");
+  if (!btn) return;
+  e.stopPropagation();
+  if (cnhInput) cnhInput.value = btn.textContent.trim();
+  toggleCnhAccordion(true);
+});
+
+// --- CLIQUES DE ABERTURA COM FECHAMENTO CRUZADO ENTRE OS 3 ---
+cityAccordionHeader?.addEventListener("click", () => {
+  toggleProfissaoAccordion(true);
+  toggleCnhAccordion(true);
+  toggleCityAccordion();
+});
+
+profissaoAccordionHeader?.addEventListener("click", () => {
+  toggleCityAccordion(true);
+  toggleCnhAccordion(true);
+  toggleProfissaoAccordion();
+});
+
+cnhAccordionHeader?.addEventListener("click", () => {
+  toggleCityAccordion(true);
+  toggleProfissaoAccordion(true);
+  toggleCnhAccordion();
+});
 
 // --- FUNÇÃO PARA GERAR O HTML DO CARD DE VISITA ---
-export function criarCardVisitaHTML({ nome, experiencia, idade, cidade, profissao, bio, email, telefone, fotoUrl, instagram, linkedin }) {
+export function criarCardVisitaHTML({ nome, experiencia, idade, cidade, profissao, bio, cnh, email, telefone, fotoUrl, instagram, linkedin }) {
   const expValor = experiencia !== undefined ? experiencia : idade;
   const textoExp = expValor == 1 ? "1 ano exp." : `${expValor} anos exp.`;
   const miniBio = bio || "";
+  const mobilidade = cnh || "";
 
   return `
     <div class="card-visita">
@@ -262,6 +292,7 @@ export function criarCardVisitaHTML({ nome, experiencia, idade, cidade, profissa
                   data-nome="${nome}"
                   data-profissao="${profissao}"
                   data-bio="${miniBio}"
+                  data-cnh="${mobilidade}"
                   data-cidade="${cidade}"
                   data-exp="${textoExp}"
                   data-foto="${fotoUrl}"
@@ -276,17 +307,6 @@ export function criarCardVisitaHTML({ nome, experiencia, idade, cidade, profissa
     </div>
   `;
 }
-
-
-
-
-
-
-
-
-
-
-
 
 // --- MÁSCARA AUTOMÁTICA OBRIGATÓRIA (61) + 9 DÍGITOS ---
 const telefoneInput = document.getElementById("telefoneInput");
@@ -370,7 +390,9 @@ function carregarCardsSalvos() {
 }
 
 // Executa o carregamento inicial dos cartões fixos
+// Executa o carregamento inicial e inicia a paginação
 carregarCardsSalvos();
+
 
 // --- ENVIO DO FORMULÁRIO COM PERSISTÊNCIA NO LOCALSTORAGE ---
 publishForm?.addEventListener("submit", (e) => {
@@ -378,7 +400,8 @@ publishForm?.addEventListener("submit", (e) => {
 
 const fotoArquivo = document.getElementById("fotoInput").files[0];
   const nome = document.getElementById("nomeInput").value.trim();
-  const experiencia = document.getElementById("experienciaInput").value.trim();
+const experiencia = document.getElementById("experienciaInput").value.trim();
+  const cnh = document.getElementById("cnhInput")?.value.trim() || "";
   const cidade = document.getElementById("cidadeInput").value.trim();
  const profissao = document.getElementById("profissaoInput").value.trim();
   const bio = document.getElementById("bioInput")?.value.trim() || "";
@@ -405,6 +428,7 @@ const fotoArquivo = document.getElementById("fotoInput").files[0];
 const dadosNovoProfissional = {
       nome,
       experiencia,
+      cnh,
       cidade,
       profissao,
       bio,
@@ -441,6 +465,8 @@ const dadosNovoProfissional = {
     }
 
     // 4. Fecha o modal e rola suavemente até o novo card
+ // 4. Recalcula a paginação para exibir o novo card na página 1 e fecha o modal
+    filtrarCardsVitrine(true);
     togglePublishModal(false);
     cardsGrid.scrollIntoView({ behavior: "smooth", block: "start" });
   });
@@ -495,54 +521,64 @@ function normalizarTexto(txt) {
 
 
 // --- SISTEMA DE FILTRO UNIFICADO: PROFISSÃO E CIDADE/RA (DF) ---
+// ================= SISTEMA DE PAGINAÇÃO E BUSCA INTEGRADA =================
+// ================= SISTEMA DE PAGINAÇÃO E BUSCA INTEGRADA =================
+const CARDS_PAGINA_1 = 6;
+const CARDS_DEMAIS_PAGINAS = 12;
+let paginaAtual = 1;
 
-// --- SISTEMA DE FILTRO UNIFICADO: NOME, PROFISSÃO E CIDADE (DF) ---
-function filtrarCardsVitrine() {
-  // 1. Obtém o que o usuário digitou e limpa acentos e letras maiúsculas
-  const termo = normalizarTexto(filtroProfissaoInput?.value || "");
-  
-  // 2. Seleciona todos os cards presentes na grade
+const paginationContainer = document.getElementById("paginationContainer");
+const paginationPagesList = document.getElementById("paginationPagesList");
+const btnPaginaAnterior = document.getElementById("btnPaginaAnterior");
+const btnPaginaProxima = document.getElementById("btnPaginaProxima");
+
+// Função matemática que calcula o total de páginas considerando 6 na primeira e 12 nas demais
+function calcularTotalPaginas(totalItens) {
+  if (totalItens <= 0) return 0;
+  if (totalItens <= CARDS_PAGINA_1) return 1;
+  const itensRestantes = totalItens - CARDS_PAGINA_1;
+  return 1 + Math.ceil(itensRestantes / CARDS_DEMAIS_PAGINAS);
+}
+
+// Atualiza quais cards ficam visíveis conforme a página selecionada
+
+// Atualiza quais cards ficam visíveis conforme a página selecionada
+function renderizarPagina(cardsFiltrados) {
   const todosCards = cardsGrid?.querySelectorAll(".card-visita");
+  const total = cardsFiltrados.length;
+  const totalPaginas = calcularTotalPaginas(total);
 
-  // 3. Exibe ou oculta o botão "X" para limpar busca
-  if (limparBuscaBtn) {
-    limparBuscaBtn.style.display = termo.length > 0 ? "grid" : "none";
+  // Garante que a página atual seja válida
+  if (paginaAtual > totalPaginas) paginaAtual = totalPaginas || 1;
+  if (paginaAtual < 1) paginaAtual = 1;
+
+  // Mostra a busca e o botão divulgue apenas na página 1; oculta da página 2 em diante
+  const heroActions = document.querySelector(".hero-actions");
+  if (heroActions) {
+    heroActions.style.display = paginaAtual === 1 ? "flex" : "none";
   }
 
-  let encontrados = 0;
-
-  // 4. Percorre cada cartão na vitrine comparando Nome, Profissão e Cidade
+  // Oculta todos os cards antes de exibir a fatia da página atual
   todosCards?.forEach((card) => {
-    const nomeTexto = card.querySelector(".card-nome")?.textContent || "";
-    const profissaoTexto = card.querySelector(".card-profissao-destaque")?.textContent || "";
-    const cidadeTexto = card.querySelector(".cidade-texto")?.textContent || "";
-
-    // Valida se o termo digitado bate com Nome, Profissão OU Cidade
-    const bateuNome = normalizarTexto(nomeTexto).includes(termo);
-    const bateuProfissao = normalizarTexto(profissaoTexto).includes(termo);
-    const bateuCidade = normalizarTexto(cidadeTexto).includes(termo);
-
-    if (bateuNome || bateuProfissao || bateuCidade) {
-      card.style.display = ""; // Mantém o display original do CSS sem quebrar a grade
-      encontrados++;
-    } else {
-      card.style.display = "none";
-    }
+    card.style.display = "none";
   });
 
-  // 5. Mensagem amigável caso não encontre nenhum resultado
-  let feedbackVazio = document.getElementById("buscaSemResultados");
-  if (encontrados === 0) {
-    if (!feedbackVazio && cardsGrid) {
-      feedbackVazio = document.createElement("p");
-      feedbackVazio.id = "buscaSemResultados";
-      feedbackVazio.style.cssText = "grid-column: 1 / -1; text-align: center; color: #64748b; font-size: 1.05rem; padding: 40px 0;";
-      feedbackVazio.textContent = "Nenhum profissional encontrado para esta busca.";
-      cardsGrid.appendChild(feedbackVazio);
-    }
-  } else if (feedbackVazio) {
-    feedbackVazio.remove();
+  // Calcula o início e o fim da fatia conforme a página
+  let inicio = 0;
+  let fim = CARDS_PAGINA_1;
+
+  if (paginaAtual > 1) {
+    inicio = CARDS_PAGINA_1 + (paginaAtual - 2) * CARDS_DEMAIS_PAGINAS;
+    fim = inicio + CARDS_DEMAIS_PAGINAS;
   }
+
+  const cardsPagina = cardsFiltrados.slice(inicio, fim);
+
+  cardsPagina.forEach((card) => {
+    card.style.display = ""; // Mantém o display padrão do grid
+  });
+
+  desenharControlesPaginacao(totalPaginas);
 }
 
 
@@ -560,36 +596,150 @@ function filtrarCardsVitrine() {
 
 
 
+// Cria as bolinhas de números e controla o estado dos botões Anterior/Próxima
+function desenharControlesPaginacao(totalPaginas) {
+  if (!paginationContainer || !paginationPagesList) return;
+
+  // Se não houver itens ou couber tudo em 1 página só, esconde a barra
+  if (totalPaginas <= 1) {
+    paginationContainer.style.display = "none";
+    return;
+  }
+  paginationContainer.style.display = "flex";
+
+  // Desenha os botões numéricos
+  paginationPagesList.innerHTML = "";
+  for (let i = 1; i <= totalPaginas; i++) {
+    const btnNum = document.createElement("button");
+    btnNum.type = "button";
+    btnNum.className = `page-num ${i === paginaAtual ? "active" : ""}`;
+    btnNum.textContent = i;
+    btnNum.addEventListener("click", () => {
+      if (paginaAtual !== i) {
+        paginaAtual = i;
+        filtrarCardsVitrine(false);
+        rolarParaTopoVitrine();
+      }
+    });
+    paginationPagesList.appendChild(btnNum);
+  }
+
+  // Desativa os botões quando atinge o limite
+  if (btnPaginaAnterior) btnPaginaAnterior.disabled = paginaAtual === 1;
+  if (btnPaginaProxima) btnPaginaProxima.disabled = paginaAtual === totalPaginas;
+}
+
+// Rola a tela suavemente para a vitrine ao trocar de página
+function rolarParaTopoVitrine() {
+  const vitrineSecao = document.getElementById("vitrine");
+  vitrineSecao?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+// Botões Anterior e Próxima
+btnPaginaAnterior?.addEventListener("click", () => {
+  if (paginaAtual > 1) {
+    paginaAtual--;
+    filtrarCardsVitrine(false);
+    rolarParaTopoVitrine();
+  }
+});
+
+btnPaginaProxima?.addEventListener("click", () => {
+  const termo = normalizarTexto(filtroProfissaoInput?.value || "");
+  const todosCards = Array.from(cardsGrid?.querySelectorAll(".card-visita") || []);
+  
+  const cardsValidos = todosCards.filter((card) => {
+    const nomeTexto = card.querySelector(".card-nome")?.textContent || "";
+    const profissaoTexto = card.querySelector(".card-profissao-destaque")?.textContent || "";
+    const cidadeTexto = card.querySelector(".cidade-texto")?.textContent || "";
+    return normalizarTexto(nomeTexto).includes(termo) ||
+           normalizarTexto(profissaoTexto).includes(termo) ||
+           normalizarTexto(cidadeTexto).includes(termo);
+  });
+
+  const totalPaginas = calcularTotalPaginas(cardsValidos.length);
+  if (paginaAtual < totalPaginas) {
+    paginaAtual++;
+    filtrarCardsVitrine(false);
+    rolarParaTopoVitrine();
+  }
+});
+
+// --- SISTEMA DE FILTRO UNIFICADO INTEGRADO COM PAGINAÇÃO ---
 
 
 
+function filtrarCardsVitrine(resetPagina = true) {
+  if (resetPagina) paginaAtual = 1;
 
+  const termo = normalizarTexto(filtroProfissaoInput?.value || "");
+  const todosCards = Array.from(cardsGrid?.querySelectorAll(".card-visita") || []);
 
+  if (limparBuscaBtn) {
+    limparBuscaBtn.style.display = termo.length > 0 ? "grid" : "none";
+  }
 
+  // Filtra os cards que atendem ao critério de busca
+  const cardsValidos = todosCards.filter((card) => {
+    const nomeTexto = card.querySelector(".card-nome")?.textContent || "";
+    const profissaoTexto = card.querySelector(".card-profissao-destaque")?.textContent || "";
+    const cidadeTexto = card.querySelector(".cidade-texto")?.textContent || "";
 
+    const bateuNome = normalizarTexto(nomeTexto).includes(termo);
+    const bateuProfissao = normalizarTexto(profissaoTexto).includes(termo);
+    const bateuCidade = normalizarTexto(cidadeTexto).includes(termo);
 
+    return bateuNome || bateuProfissao || bateuCidade;
+  });
 
+  // Mensagem amigável caso não encontre nenhum resultado
+// Mensagem amigável caso não encontre nenhum resultado
+  let feedbackVazio = document.getElementById("buscaSemResultados");
+  if (cardsValidos.length === 0) {
+    todosCards.forEach((c) => (c.style.display = "none"));
+    cardsGrid?.classList.remove("modo-busca-rolagem");
+    if (!feedbackVazio && cardsGrid) {
+      feedbackVazio = document.createElement("p");
+      feedbackVazio.id = "buscaSemResultados";
+      feedbackVazio.style.cssText = "grid-column: 1 / -1; text-align: center; color: #64748b; font-size: 1.05rem; padding: 40px 0;";
+      feedbackVazio.textContent = "Nenhum profissional encontrado para esta busca.";
+      cardsGrid.appendChild(feedbackVazio);
+    }
+    if (paginationContainer) paginationContainer.style.display = "none";
+  } else {
+    if (feedbackVazio) feedbackVazio.remove();
 
+    // SE O USUÁRIO ESTÁ PESQUISANDO: trava a altura e ativa a rolagem interna do grid
+    if (termo.length > 0) {
+      todosCards.forEach((c) => (c.style.display = "none"));
+      cardsValidos.forEach((c) => (c.style.display = ""));
+      cardsGrid?.classList.add("modo-busca-rolagem");
+      if (paginationContainer) paginationContainer.style.display = "none";
+      cardsGrid.scrollTop = 0; // Volta a rolagem para o topo
+    } else {
+      // SE A BUSCA ESTÁ VAZIA: desativa a rolagem interna e volta à paginação normal
+      cardsGrid?.classList.remove("modo-busca-rolagem");
+      renderizarPagina(cardsValidos);
+    }
+  }
 
+}
 
+// Dispara o filtro automaticamente ao digitar
+filtroProfissaoInput?.addEventListener("input", () => filtrarCardsVitrine(true));
 
-
-
-
-
-// Filtra automaticamente conforme o usuário digita
-filtroProfissaoInput?.addEventListener("input", filtrarCardsVitrine);
-
-
-
-// Limpa a busca e restaura todos os cards
+// Limpa a busca e restaura a vitrine na página 1
+// Limpa a busca e restaura a vitrine na página 1
 limparBuscaBtn?.addEventListener("click", () => {
   if (filtroProfissaoInput) {
     filtroProfissaoInput.value = "";
-    filtrarCardsVitrine();
+    filtrarCardsVitrine(true);
     filtroProfissaoInput.focus();
   }
 });
+
+// Inicializa a paginação exibindo os primeiros 6 cards e gerando os botões
+filtrarCardsVitrine(true);
 
 // --- CONTROLE DO MODAL ÚNICO DO CARTÃO DE VISITA ---
 const cartaoModal = document.getElementById("cartaoModal");
@@ -613,7 +763,8 @@ cardsGrid?.addEventListener("click", (e) => {
 
 const nome = btn.getAttribute("data-nome");
   const profissao = btn.getAttribute("data-profissao");
-  const bio = btn.getAttribute("data-bio") || "";
+const bio = btn.getAttribute("data-bio") || "";
+  const cnh = btn.getAttribute("data-cnh") || "";
   const cidade = btn.getAttribute("data-cidade");
   const exp = btn.getAttribute("data-exp");
   const foto = btn.getAttribute("data-foto");
@@ -626,7 +777,23 @@ const nome = btn.getAttribute("data-nome");
   document.getElementById("modalFoto").src = foto;
 document.getElementById("modalProfissao").textContent = profissao;
   document.getElementById("modalCidade").textContent = cidade;
-  document.getElementById("modalExp").textContent = exp;
+
+  // Formata o texto para aparecer completo: "X anos de experiência"
+  const anosApenas = exp.replace(/\D/g, "");
+  const textoExpCompleto = anosApenas == 1 ? "1 ano de experiência" : `${anosApenas} anos de experiência`;
+  document.getElementById("modalExp").textContent = textoExpCompleto;
+
+  // Preenche a Mobilidade / CNH
+  const modalCnhLinha = document.getElementById("modalCnhLinha");
+  const modalCnh = document.getElementById("modalCnh");
+  if (modalCnhLinha && modalCnh) {
+    if (cnh) {
+      modalCnh.textContent = cnh;
+      modalCnhLinha.style.display = "flex";
+    } else {
+      modalCnhLinha.style.display = "none";
+    }
+  }
 
   // Preenchimento e exibição condicional da Mini Bio
   const modalBio = document.getElementById("modalBio");

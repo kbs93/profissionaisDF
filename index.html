@@ -67,6 +67,11 @@
     </div>
   </section>
 
+
+
+
+  
+
   <!-- ================= SEÇÃO DE CARDS / VITRINE ================= -->
   <main class="main-content" id="vitrine">
     <div class="section-title">
@@ -80,24 +85,88 @@
     </div>
   </main>
   <!-- ================= PAGINAÇÃO NO FINAL DA PÁGINA ================= -->
-  <div class="pagination-container" style="margin-bottom: 50px;">
-    <button class="pagination-btn nav-btn" aria-label="Página anterior">
+<!-- ================= PAGINAÇÃO DINÂMICA ================= -->
+  <div class="pagination-container" id="paginationContainer" style="margin-bottom: 50px;">
+    <button type="button" class="pagination-btn nav-btn" id="btnPaginaAnterior" aria-label="Página anterior">
       <i class="bi bi-chevron-left"></i> ANTERIOR
     </button>
 
-    <div class="pagination-pages">
-      <button class="page-num active">1</button>
-      <button class="page-num">2</button>
-      <button class="page-num">3</button>
-      <button class="page-num">4</button>
-      <button class="page-num">5</button>
+    <div class="pagination-pages" id="paginationPagesList">
+      <!-- Os botões de números das páginas são gerados dinamicamente via JS -->
     </div>
 
-    <button class="pagination-btn nav-btn" aria-label="Próxima página">
+    <button type="button" class="pagination-btn nav-btn" id="btnPaginaProxima" aria-label="Próxima página">
       PRÓXIMA <i class="bi bi-chevron-right"></i>
     </button>
   </div>
 
+  <!-- ================= SEÇÃO DE CONTEÚDO EDITORIAL (SEM CARDS) ================= -->
+  <section class="how-it-works-section" id="quem-somos">
+    <div class="content-editorial-container">
+      
+      <div class="editorial-main-header">
+        <h2>A Ponte Direta Entre Quem Faz e Quem Precisa no DF</h2>
+        <p>Entenda em detalhes como funciona a dinâmica da plataforma, o impacto econômico para os profissionais locais e a segurança para quem contrata.</p>
+      </div>
+
+      <!-- ARTIGO 1: PARA PROFISSIONAIS -->
+      <article class="editorial-article">
+        <div class="editorial-header-row">
+          <img src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=300&q=80" alt="Profissional do DF" class="editorial-thumb">
+          <div class="editorial-titles">
+            <span class="editorial-category"><i class="bi bi-person-badge"></i> O Ecossistema para Profissionais Autônomos e Técnicos</span>
+            <h3>Independência profissional, presença digital e 100% da renda no seu bolso</h3>
+          </div>
+        </div>
+
+        <div class="editorial-text-flow">
+          <p>
+            O mercado de trabalho no Distrito Federal possui particularidades geográficas muito claras: deslocar-se de uma Região Administrativa para outra exige tempo, planejamento e custos logísticos. Historicamente, os profissionais autônomos da capital enfrentavam dois grandes obstáculos: a dependência do boca a boca ou a submissão a intermediários que cobram taxas exorbitantes por comissão de serviços ou taxas fixas por orçamentos que muitas vezes nem viravam clientes.
+          </p>
+          <p>
+            Esta plataforma foi construída com um propósito direto: transformar qualquer prestador de serviços em uma autoridade digital local. Ao publicar seu cartão de visita, você estabelece um ponto de contato público, limpo e profissional acessível por qualquer celular. Moradores de Ceilândia, Taguatinga, Águas Claras, Plano Piloto, Guará, Samambaia e de todo o DF passam a encontrar seu nome diretamente associado à sua competência técnica.
+          </p>
+          
+          <div class="editorial-in-depth-block">
+            <h4>Por que este formato valoriza sua carreira?</h4>
+            <p><strong>1. Negociação livre e desintermediada:</strong> Aqui não há retenção de valores. Todo o acerto de preços, condições de pagamento, compra de materiais e escopo é definido exclusivamente entre você e o contratante via WhatsApp ou ligação direta.</p>
+            <p><strong>2. Vitrine permanente sem mensalidades ocultas:</strong> Seu perfil permanece ativo e pesquisável na vitrine regional, permitindo que condomínios, empresas e clientes residenciais descubram seu trabalho a qualquer hora do dia.</p>
+            <p><strong>3. Apresentação profissional completa:</strong> Um cartão digital centraliza seus anos de experiência, especialidade central, portfólio em redes sociais (como Instagram e LinkedIn) e mobilidade, transmitindo segurança imediata para quem contrata.</p>
+          </div>
+        </div>
+      </article>
+
+      <hr class="editorial-divider">
+
+      <!-- ARTIGO 2: PARA EMPRESAS E CONTRATANTES -->
+      <article class="editorial-article">
+        <div class="editorial-header-row">
+          <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=300&q=80" alt="Empresas no DF" class="editorial-thumb business-border">
+          <div class="editorial-titles">
+            <span class="editorial-category business"><i class="bi bi-buildings"></i> Solução Ágil para Empresas, Comércios e Clientes Finais</span>
+            <h3>Contratação sob medida: encontre especialistas verificados perto de você</h3>
+          </div>
+        </div>
+
+        <div class="editorial-text-flow">
+          <p>
+            Seja para uma empresa comercial que precisa resolver um reparo de emergência em sua infraestrutura física, um escritório que busca suporte técnico qualificado, ou uma família que necessita de reformas residenciais, o maior risco sempre foi a incerteza da qualificação técnica e a perda de tempo com processos burocráticos de triagem.
+          </p>
+          <p>
+            Nossa vitrine pública do Distrito Federal organiza os talentos locais por categoria profissional e cidade satélite, entregando em segundos exatamente o perfil que atende a sua necessidade operacional. Não há cadastros complexos nem barreiras para entrar em contato: visualizou a qualificação, clicou no botão de contato e você já está em conversa direta com o executor do serviço.
+          </p>
+          
+          <div class="editorial-in-depth-block">
+            <h4>Benefícios operacionais para quem contrata:</h4>
+            <p><strong>1. Resposta rápida para demandas urgentes:</strong> Encontre prestadores que residem e atuam próximos da sua localidade, reduzindo drasticamente o tempo de resposta para serviços de manutenção, suporte e obras.</p>
+            <p><strong>2. Avaliação de credenciais sem rodeios:</strong> Consulte os anos de atuação no mercado, confira a mobilidade/CNH do profissional para serviços de campo e acesse as redes sociais para conferir fotos reais de serviços entregues anteriormente.</p>
+            <p><strong>3. Fomento direto à economia local:</strong> Ao contratar profissionais do próprio DF de maneira direta, seu investimento apoia o empreendedorismo regional da capital, sem desvios de taxas para grandes intermediadoras multinacionais.</p>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
   <!-- ================= MODAL DE DIVULGAÇÃO ================= -->
   <div class="modal-overlay" id="publishModal">
     <div class="modal-card">
@@ -134,13 +203,32 @@
           </div>
         </div>
 
-     <div class="input-row-item">
+ <div class="input-row-item">
           <div class="row-icon-box">
             <i class="bi bi-award"></i>
           </div>
           <div class="row-input-wrap">
             <label for="experienciaInput">Tempo de Experiência</label>
             <input type="number" id="experienciaInput" placeholder="Ex: 5 (anos)" required min="0" max="60">
+          </div>
+        </div>
+
+        <!-- Campo Mobilidade / Condução no DF -->
+    <!-- Campo Carteira de Habilitação com Sistema de Accordion -->
+        <div class="input-row-item accordion-item-city">
+          <div class="row-icon-box">
+            <i class="bi bi-car-front"></i>
+          </div>
+          <div class="row-input-wrap">
+            <label for="cnhInput">Carteira de Habilitação</label>
+            <div class="city-accordion-header" id="cnhAccordionHeader">
+              <input type="text" id="cnhInput" placeholder="Selecione sua mobilidade / CNH" readonly required>
+              <i class="bi bi-chevron-down accordion-arrow" id="cnhArrowIcon"></i>
+            </div>
+            <!-- Gaveta expansível (Accordion de Habilitação) -->
+            <div class="city-accordion-drawer" id="cnhAccordionDrawer">
+              <div class="city-list-wrapper" id="cnhListWrapper"></div>
+            </div>
           </div>
         </div>
 
@@ -252,22 +340,34 @@
         </div>
         
         <h3 id="modalNome" class="cartao-modal-nome"></h3>
-        
-        <div class="cartao-modal-profissao">
-          <i class="bi bi-person-workspace"></i>
-          <span id="modalProfissao"></span>
+        <h3 id="modalNome" class="cartao-modal-nome"></h3>
+
+        <!-- Bloco que agrupa somente os ícones alinhados entre si -->
+        <div class="cartao-modal-detalhes-bloco">
+          <div class="cartao-modal-profissao">
+            <i class="bi bi-person-workspace"></i>
+            <span id="modalProfissao"></span>
+          </div>
+
+          <div class="cartao-modal-detalhes-lista">
+            <div class="modal-info-linha-item">
+              <i class="bi bi-geo-alt-fill"></i>
+              <span id="modalCidade"></span>
+            </div>
+            <div class="modal-info-linha-item">
+              <i class="bi bi-award-fill"></i>
+              <span id="modalExp"></span>
+            </div>
+            <div class="modal-info-linha-item" id="modalCnhLinha" style="display: none;">
+              <i class="bi bi-car-front-fill"></i>
+              <span id="modalCnh"></span>
+            </div>
+          </div>
         </div>
 
-   <div class="cartao-modal-info-linha">
-          <i class="bi bi-geo-alt-fill"></i>
-          <span id="modalCidade"></span>
-          <span class="separador-bullet">•</span>
-          <span id="modalExp"></span>
-        </div>
 
         <!-- Mini Bio / Resumo exibido no Modal -->
         <p id="modalBio" class="cartao-modal-bio" style="display: none;"></p>
-
       <!-- Botão compacto de WhatsApp -->
 
       <!-- Botão compacto de WhatsApp -->
