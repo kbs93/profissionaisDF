@@ -88,10 +88,11 @@ experienciaInput?.addEventListener("input", (e) => {
 export function toggleModal(modalElement, isOpen) {
   if (!modalElement) return;
   modalElement.classList.toggle("open", isOpen);
-  const algumModalAberto = document.querySelector(".modal-overlay.open");
-  document.body.style.overflow = algumModalAberto ? "hidden" : "";
+  requestAnimationFrame(() => {
+    const algumModalAberto = document.querySelector(".modal-overlay.open");
+    document.body.style.overflow = algumModalAberto ? "hidden" : "";
+  });
 }
-
 export function toggleAuthModal(isOpen) {
   toggleModal(authModal, isOpen);
 }
@@ -186,6 +187,29 @@ export async function abrirPainelUsuario() {
 }
 
 // Alternar Status do Cartao no Firestore / firebase
+// Alternar Status do Cartão (Publicar / Pausar) no Firestore
+// Alternar Status do Cartão no Firestore
+btnToggleStatus?.addEventListener("click", async () => {
+  const usuario = getUsuarioLogado();
+  if (!usuario) return;
+
+  const cartaoExistente = await getMeuCartao();
+  if (!cartaoExistente) return;
+
+  const novoStatus = cartaoExistente.status === "publicado" ? "pausado" : "publicado";
+
+  try {
+  
+    await setDoc(doc(db, "cartoes", cartaoExistente.id), { status: novoStatus }, { merge: true });
+    showToast(novoStatus === "publicado" ? "Cartão publicado na vitrine!" : "Cartão pausado com sucesso.");
+    await abrirPainelUsuario();
+  } catch (err) {
+    console.error("Erro ao alternar status:", err);
+    showToast("Erro ao alternar status do cartão.");
+  }
+});
+
+// Excluir Cartão do Firestore
 btnExcluirMeuCartao?.addEventListener("click", async () => {
   const usuario = getUsuarioLogado();
   if (!usuario) return;
@@ -195,32 +219,17 @@ btnExcluirMeuCartao?.addEventListener("click", async () => {
 
   if (confirm("Tem certeza que deseja excluir seu cartão de visita?")) {
     try {
-      await deleteDoc(doc(db, "cartoes", cartaoExistente.id));
+     await deleteDoc(doc(db, "cartoes", cartaoExistente.id));
       showToast("Cartão excluído com sucesso.");
       await abrirPainelUsuario();
-      await filtrarCardsVitrine(true);
+
     } catch (err) {
       showToast("Erro ao excluir o cartão.");
     }
   }
 });
 
-// Excluir Cartão do Firestore
-btnExcluirMeuCartao?.addEventListener("click", async () => {
-  const usuario = getUsuarioLogado();
-  if (!usuario) return;
 
-  if (confirm("Tem certeza que deseja excluir seu cartão de visita?")) {
-    try {
-      await deleteDoc(doc(db, "cartoes", usuario.uid));
-      showToast("Cartão excluído com sucesso.");
-      await abrirPainelUsuario();
-      await filtrarCardsVitrine(true);
-    } catch (err) {
-      showToast("Erro ao excluir o cartão.");
-    }
-  }
-});
 
 // --- LÓGICA DO FORMULÁRIO DO CARTÃO ---
 export async function prepararFormularioCartao() {
@@ -388,20 +397,15 @@ publishForm?.addEventListener("submit", async (e) => {
     return;
   }
 
- const salvarCardFinal = async (fotoUrlFinal) => {
-    // Limpa caracteres especiais do nome para gerar um ID limpo
+const salvarCardFinal = async (fotoUrlFinal) => {
     const nomeLimpo = nome
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .replace(/[^a-zA-Z0-9]/g, "_")
       .slice(0, 20);
 
-    // Obtém os últimos 6 caracteres do UID
     const sufixoUid = usuario.uid.slice(-6);
-
-    // Formato final do ID: Nome_Sobrenome_Ultimos6Digitos
-    const novoDocId = `${nomeLimpo}_${sufixoUid}`;
-    const docIdFinal = cartaoExistente ? cartaoExistente.id : novoDocId;
+    const docIdDestino = cartaoExistente ? cartaoExistente.id : `${nomeLimpo}_${sufixoUid}`;
 
     const dadosCard = {
       uid: usuario.uid,
@@ -416,26 +420,22 @@ publishForm?.addEventListener("submit", async (e) => {
       fotoUrl: fotoUrlFinal,
       instagram,
       linkedin,
-      status: cartaoExistente ? cartaoExistente.status : "publicado",
+      status: "pausado", // Salva SEMPRE como pausado. Só vai para o index se clicar no botão Publicar
       atualizadoEm: new Date().toISOString()
     };
 
     try {
-      // Se for uma edição e o nome tiver mudado, remove o registo com o ID antigo
-      if (cartaoExistente && cartaoExistente.id !== novoDocId) {
-        await deleteDoc(doc(db, "cartoes", cartaoExistente.id));
-      }
-
-      await setDoc(doc(db, "cartoes", novoDocId), dadosCard, { merge: true });
-      showToast(cartaoExistente ? "Cartão atualizado com sucesso!" : "Cartão criado e publicado na vitrine!");
+      await setDoc(doc(db, "cartoes", docIdDestino), dadosCard, { merge: true });
+      showToast("Cartão guardado! Aceda ao seu painel e clique em 'Publicar Cartão' quando quiser exibi-lo.");
       togglePublishModal(false);
       await abrirPainelUsuario();
-      await filtrarCardsVitrine(true);
     } catch (err) {
       console.error("Erro ao salvar cartão:", err);
       showToast("Erro ao salvar no banco de dados.");
     }
   };
+
+
 
   if (fotoArquivo) {
     redimensionarFoto(fotoArquivo, (novaFotoUrl) => {

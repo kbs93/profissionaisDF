@@ -114,7 +114,6 @@ googleLoginBtn?.addEventListener("click", async () => {
     setUsuarioLogado(usuario);
     toggleAuthModal(false);
     showToast(`Bem-vindo, ${usuario.nome}!`);
-    await abrirPainelUsuario();
   } catch (err) {
     showToast("Falha ao entrar com o Google.");
   }

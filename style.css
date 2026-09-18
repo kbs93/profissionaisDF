@@ -212,23 +212,27 @@ body { background-color: #f8fafc; color: #0f172a; overflow-x: hidden; }
   .card-nome { font-size: 0.68rem; letter-spacing: 0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%; }
   /* Profissão: alinhada à esquerda com ícone fixo */
 
-  .card-dados-pessoais { display: flex; flex-direction: column; align-items: flex-start; width: 100%; min-width: 0; gap: 4px; padding: 0 4px; box-sizing: border-box; }
+
+
+.card-dados-pessoais { display: flex; flex-direction: column; align-items: flex-start; width: 100%; min-width: 0; gap: 4px; padding: 0 4px; box-sizing: border-box; }
   .card-header-nome { align-self: center; padding: 2px 6px; max-width: 100%; width: 100%; box-sizing: border-box; overflow: hidden; text-align: center; margin-bottom: 2px; }
-  .card-nome { font-size: 0.70rem; letter-spacing: 0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%; }
-  .card-profissoes-lista { display: flex; flex-direction: column; width: 100%; min-width: 0; gap: 2px; }
-  .card-profissao-linha { display: flex; align-items: center; gap: 4px; font-size: 0.74rem; line-height: 1.25; width: 100%; min-width: 0; text-align: left; }
-  .card-profissao-linha i { font-size: 0.78rem; width: 14px; min-width: 14px; text-align: center; flex-shrink: 0; }
+  .card-nome { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%; }
+  .card-profissoes-lista { display: flex; flex-direction: column; width: 100%; min-width: 0; gap: 3px; }
+  .card-profissao-linha { display: flex; align-items: center; gap: 4px; font-size: 0.72rem; line-height: 1.25; width: 100%; min-width: 0; text-align: left; }
+  .card-profissao-linha i { font-size: 0.76rem; width: 14px; min-width: 14px; text-align: center; flex-shrink: 0; }
   .card-profissao-linha span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; }
-  .card-linha-discreta { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-start; text-align: left; width: 100%; min-width: 0; font-size: 0.72rem; line-height: 1.3; gap: 4px; color: #64748b; margin-top: 2px; }
-  .card-linha-discreta i { font-size: 0.66rem; width: 14px; min-width: 14px; text-align: center; flex-shrink: 0; color: #94a3b8; }
-  .card-linha-discreta .cidade-texto { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; }
- .card-linha-discreta .separador-bullet { display: none; }
-  .card-linha-discreta .exp-destaque { width: 100%; padding-left: 0; margin-top: 1px; font-size: 0.90rem; font-weight: 600; color: #475569; white-space: nowrap; text-align: left; }
-  
-  /* Área de perfil no mobile */
+  .card-linha-discreta { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-start; text-align: left; width: 100%; min-width: 0; font-size: 0.72rem; line-height: 1.3; gap: 4px; color: #64748b; margin-top: 3px; }
+  .card-linha-discreta i { font-size: 0.76rem; width: 14px; min-width: 14px; text-align: center; flex-shrink: 0; color: #94a3b8; }
+  .card-linha-discreta .cidade-texto { font-size: 0.72rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; }
+  .card-linha-discreta .separador-bullet { display: none; }
+  .card-linha-discreta .exp-destaque { width: 100%; padding-left: 0; margin-top: 2px; font-size: 0.72rem; font-weight: 600; color: #475569; white-space: nowrap; text-align: left; }
   .card-perfil-col { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0; border: none; gap: 6px; width: 100%; min-width: 0; }
-  /* Botão Ver mais alinhado ao centro no card mobile */
   .btn-abrir-cartao { align-self: center; width: 100%; justify-content: center; padding: 6px 10px; font-size: 0.74rem; margin-top: 6px; }
+
+
+
+
+
   .hero-content h1 { font-size: 1.7rem; }
 }
 
@@ -375,37 +379,21 @@ body { background-color: #f8fafc; color: #0f172a; overflow-x: hidden; }
 
 .btn-abrir-cartao:active { transform: scale(0.97); }
 
-/* ================= MODAL DO CARTÃO DE VISITA ================= */
-.modal-cartao-detalhe { max-width: 320px; text-align: center; padding: 24px 20px; }
+/* ================= MODAL DO CARTÃO DE VISITA AO CLICAR NO BOTAO VER MAIS ================= */
 
-.cartao-modal-corpo { display: flex; flex-direction: column; align-items: center; }
-
+.modal-cartao-detalhe { max-width: 360px; text-align: center; padding: 26px 22px; }
+.cartao-modal-corpo { display: flex; flex-direction: column; align-items: center; width: 100%; }
 .cartao-modal-avatar { width: 110px; height: 110px; border-radius: 50%; overflow: hidden; border: 3px solid #0284c7; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12); margin-bottom: 12px; }
-
 .cartao-modal-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
-
-/* Nome com entrelinha justa para não sobrar espaço quando quebra */
-.cartao-modal-nome { font-size: 1.12rem; font-weight: 700; color: #0f172a; line-height: 1.2; margin: 0 auto 10px auto; text-align: center; max-width: 95%; }
-
-/* Profissão centralizada em evidência */
-/* Nome centralizado no card com espaçamento entre linhas reduzido */
-.cartao-modal-nome { font-size: 1.12rem; font-weight: 700; color: #0f172a; line-height: 1.2; margin: 0 auto 10px auto; text-align: center; max-width: 95%; display: block; }
-
-/* Bloco centralizado na tela, mas com os ícones internos alinhados à esquerda entre si */
-.cartao-modal-detalhes-bloco { display: flex; flex-direction: column; align-items: flex-start; width: fit-content; margin: 0 auto 14px auto; gap: 5px; }
-
-/* Profissão com ícone travado na mesma largura dos itens de baixo */
-.cartao-modal-profissao { display: flex; align-items: center; gap: 8px; color: #0284c7; font-weight: 600; font-size: 0.90rem; line-height: 1.25; text-align: left; margin: 0; }
-
-.cartao-modal-profissao i { width: 20px; min-width: 20px; text-align: center; font-size: 0.95rem; color: #0284c7; flex-shrink: 0; }
-
-/* Lista vertical dos dados */
-.cartao-modal-detalhes-lista { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; width: 100%; }
-
-/* Cada item com a mesma largura de 20px no ícone para ficarem alinhados na mesma coluna vertical */
-.modal-info-linha-item { display: flex; align-items: center; gap: 8px; font-size: 0.80rem; color: #64748b; line-height: 1.25; white-space: nowrap; text-align: left; }
-
-.modal-info-linha-item i { width: 20px; min-width: 20px; text-align: center; font-size: 0.88rem; color: #0284c7; flex-shrink: 0; }
+.cartao-modal-nome { font-size: 1.25rem; font-weight: 700; color: #0f172a; line-height: 1.25; margin: 0 auto 12px auto; text-align: center; max-width: 100%; display: block; }
+.cartao-modal-detalhes-bloco { display: flex; flex-direction: column; align-items: flex-start; width: 100%; max-width: 290px; margin: 0 auto 16px auto; gap: 8px; }
+.cartao-modal-profissoes-lista { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; width: 100%; margin-bottom: 0; }
+.cartao-modal-profissao { display: flex; align-items: center; gap: 10px; color: #0284c7; font-weight: 600; font-size: 0.95rem; line-height: 1.3; text-align: left; margin: 0; width: 100%; }
+.cartao-modal-profissao i { width: 22px; min-width: 22px; text-align: center; font-size: 1.05rem; color: #0284c7; flex-shrink: 0; }
+.cartao-modal-profissao span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cartao-modal-detalhes-lista { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; width: 100%; }
+.modal-info-linha-item { display: flex; align-items: center; gap: 10px; font-size: 0.95rem; font-weight: 500; color: #475569; line-height: 1.3; white-space: nowrap; text-align: left; width: 100%; }
+.modal-info-linha-item i { width: 22px; min-width: 22px; text-align: center; font-size: 1.05rem; color: #0284c7; flex-shrink: 0; }
 
 /* Botão do WhatsApp com altura e padding reduzidos */
 .btn-modal-zap-compacto { background: #16a34a; color: #fff; padding: 10px 22px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 0.88rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 18px; transition: background 0.2s ease,transform 0.1s ease; }
@@ -429,9 +417,10 @@ body { background-color: #f8fafc; color: #0f172a; overflow-x: hidden; }
 
 .btn-contato-quadrado.linkedin:hover { background: #0077b5; border-color: #0077b5; color: #fff; }
 
+
 /* ================= MINI BIO NO MODAL ================= */
-/* ================= MINI BIO NO MODAL ================= */
-.cartao-modal-bio { font-size: 0.82rem; color: #334155; line-height: 1.45; background: #f8fafc; border-left: 3px solid #0284c7; padding: 8px 12px; border-radius: 4px 8px 8px 4px; margin-bottom: 16px; text-align: left; width: 100%; max-width: 100%; box-sizing: border-box; word-break: break-all; }
+.cartao-modal-bio { font-size: 0.90rem; color: #334155; line-height: 1.5; background: #f8fafc; border-left: 3px solid #0284c7; padding: 10px 14px; border-radius: 4px 8px 8px 4px; margin-bottom: 18px; text-align: left; width: 100%; max-width: 100%; box-sizing: border-box; word-break: normal; }
+
 /* Estado desabilitado dos botões Anterior e Próxima */
 .pagination-btn.nav-btn:disabled {
   opacity: 0.4;
@@ -532,10 +521,3 @@ body { background-color: #f8fafc; color: #0f172a; overflow-x: hidden; }
   padding: 40px 0;
 }
 
-.cartao-modal-profissoes-lista {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  width: 100%;
-  margin-bottom: 2px;
-}
