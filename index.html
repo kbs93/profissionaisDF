@@ -11,33 +11,19 @@
 </head>
 <body>
 
+
   <!-- ================= HEADER / NAVBAR ================= -->
-<header class="main-header">
+  <header class="main-header">
     <div class="nav-container">
+      <!-- Botão Hambúrguer (só aparece no mobile) -->
       <button class="hamburger-btn" id="hamburgerBtn" aria-label="Abrir Menu">
         <i class="bi bi-list"></i>
       </button>
-
+      <!-- Logo Central / Esquerda -->
       <a href="#" class="brand-logo">
         <i class="bi bi-briefcase-fill"></i> Profissionais<span>DF</span>
       </a>
-
-      <!-- Perfil fixo no topo Mobile (oculto no Desktop) -->
-      <div class="mobile-user-slot" id="mobileUserSlot">
-        <div id="mobileAuthItem">
-          <a href="javascript:void(0)" id="openMobileAuthModalBtn" class="nav-auth-link nav-auth-guest">
-            <i class="bi bi-person-circle nav-guest-icon" style="font-size: 28px; color: #5e5b5ba9;"></i>
-          </a>
-        </div>
-        <div id="mobileUserBadgeItem" style="display: none;">
-          <div class="nav-user-badge">
-            <span id="mobileUserFirstName" class="nav-user-name">Usuário</span>
-            <img id="mobileUserPhoto" src="" alt="Foto" class="nav-user-img">
-          </div>
-        </div>
-      </div>
-
-      <!-- Menu Principal (Desktop completo e Gaveta Mobile) -->
+      <!-- Menu gaveta (exclusivamente os links de navegação) -->
       <nav class="nav-menu" id="navMenu">
         <button class="close-menu-btn" id="closeMenuBtn" aria-label="Fechar Menu">✕</button>
         <ul class="nav-links">
@@ -45,20 +31,23 @@
           <li><a href="#vitrine">Profissionais</a></li>
           <li><a href="#quem-somos">Quem Somos</a></li>
           <li id="navPanelItem"><a href="javascript:void(0)" id="openDashboardNavBtn">Meu Painel</a></li>
-          <li id="navAuthItem">
-            <a href="javascript:void(0)" id="openAuthModalBtn" class="nav-auth-link nav-auth-guest">
-              <span>Entrar</span>
-              <i class="bi bi-person-circle nav-guest-icon" style="font-size: 32px; color: #5e5b5ba9;"></i>
-            </a>
-          </li>
-          <li id="navUserBadgeItem" style="display: none;">
-            <div class="nav-user-badge" id="navUserBadge">
-              <span id="navUserFirstName" class="nav-user-name">Usuário</span>
-              <img id="navUserPhoto" src="" alt="Foto" class="nav-user-img">
-            </div>
-          </li>
         </ul>
       </nav>
+      <!-- Slot ÚNICO de perfil/login (atende Desktop e Mobile simultaneamente) -->
+      <div class="header-user-slot">
+        <div id="navAuthItem">
+          <a href="javascript:void(0)" id="openAuthModalBtn" class="nav-auth-link nav-auth-guest">
+            <span>Entrar</span>
+            <i class="bi bi-person-circle nav-guest-icon " style="font-size: 35px;"></i>
+          </a>
+        </div>
+        <div id="navUserBadgeItem" style="display: none;">
+          <div class="nav-user-badge" id="navUserBadgeBtn" style="cursor: pointer;">
+            <span id="navUserFirstName" class="nav-user-name">Usuário</span>
+            <img id="navUserPhoto" src="" alt="Foto" class="nav-user-img">
+          </div>
+        </div>
+      </div>
     </div>
   </header>
 

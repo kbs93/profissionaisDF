@@ -51,24 +51,17 @@ document.querySelectorAll(".nav-links a").forEach((link) => {
 });
 
 
-
 const openAuthModalBtn = document.getElementById("openAuthModalBtn");
-const openMobileAuthModalBtn = document.getElementById("openMobileAuthModalBtn");
 const googleLoginBtn = document.getElementById("googleLoginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const navAuthItem = document.getElementById("navAuthItem");
-const mobileAuthItem = document.getElementById("mobileAuthItem");
 const navLogoutItem = document.getElementById("navLogoutItem");
 const navPanelItem = document.getElementById("navPanelItem");
 const openDashboardNavBtn = document.getElementById("openDashboardNavBtn");
 const navUserBadgeItem = document.getElementById("navUserBadgeItem");
-const mobileUserBadgeItem = document.getElementById("mobileUserBadgeItem");
+const navUserBadgeBtn = document.getElementById("navUserBadgeBtn");
 const navUserPhoto = document.getElementById("navUserPhoto");
-const mobileUserPhoto = document.getElementById("mobileUserPhoto");
 const navUserFirstName = document.getElementById("navUserFirstName");
-const mobileUserFirstName = document.getElementById("mobileUserFirstName");
-const heroActionBtn = document.getElementById("heroActionBtn");
-const heroActionText = document.getElementById("heroActionText");
 
 function getUsuarioLogado() {
   const dados = localStorage.getItem("profissionaisDF_usuario");
@@ -120,73 +113,45 @@ vigiarSessao((usuario) => {
 
 function atualizarInterfaceSessao() {
   const usuario = getUsuarioLogado();
-  const isMobile = window.matchMedia("(max-width: 768px)").matches;
 
   if (navPanelItem) navPanelItem.style.display = "inline-block";
 
   if (usuario) {
-    // Desktop: se estiver no celular (isMobile), o li dentro da lista fica "none" para não duplicar
     if (navLogoutItem) navLogoutItem.style.display = "inline-block";
-    if (navUserBadgeItem) navUserBadgeItem.style.display = isMobile ? "none" : "inline-flex";
+    if (navUserBadgeItem) navUserBadgeItem.style.display = "inline-flex";
     if (navAuthItem) navAuthItem.style.display = "none";
 
-    // Mobile (topo fixo)
-    if (mobileUserBadgeItem) mobileUserBadgeItem.style.display = isMobile ? "flex" : "none";
-    if (mobileAuthItem) mobileAuthItem.style.display = "none";
+    if (navUserPhoto) {
+      navUserPhoto.src = usuario.foto || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120";
+    }
 
-    const foto = usuario.foto || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120";
-    const nome = (usuario.nome || "Usuário").trim();
-
-    if (navUserPhoto) navUserPhoto.src = foto;
-    if (mobileUserPhoto) mobileUserPhoto.src = foto;
-
-    if (navUserFirstName) navUserFirstName.textContent = nome;
-    if (mobileUserFirstName) mobileUserFirstName.textContent = nome;
+    if (navUserFirstName) {
+      navUserFirstName.textContent = (usuario.nome || "Usuário").trim();
+    }
 
     if (heroActionText) heroActionText.textContent = "Acessar Meu Painel";
   } else {
-    // Desktop: se for celular, o item entrar da lista também não duplica
     if (navLogoutItem) navLogoutItem.style.display = "none";
     if (navUserBadgeItem) navUserBadgeItem.style.display = "none";
-    if (navAuthItem) navAuthItem.style.display = isMobile ? "none" : "inline-block";
-
-    // Mobile (topo fixo)
-    if (mobileUserBadgeItem) mobileUserBadgeItem.style.display = "none";
-    if (mobileAuthItem) mobileAuthItem.style.display = isMobile ? "flex" : "none";
+    if (navAuthItem) navAuthItem.style.display = "inline-block";
 
     if (heroActionText) heroActionText.textContent = "Divulgue sua Profissão";
   }
 }
-
-// Reavalia a interface sem recarregar caso a tela seja redimensionada
-window.addEventListener("resize", () => {
-  atualizarInterfaceSessao();
-});
-
-
-
-
-
-
-
 
 // Abrir modal de Login
 openAuthModalBtn?.addEventListener("click", () => {
   toggleMenu(true);
   toggleAuthModal(true);
 });
-openMobileAuthModalBtn?.addEventListener("click", () => {
-  toggleMenu(true);
-  toggleAuthModal(true);
-});
 
-mobileUserBadgeItem?.addEventListener("click", () => {
+// Abrir painel ao clicar na foto/nome no topo
+navUserBadgeBtn?.addEventListener("click", () => {
   toggleMenu(true);
   abrirPainelUsuario();
 });
 
-// Abrir Meu Painel pelo link no menu
-// Clique em Meu Painel no menu (se estiver logado abre o painel, se deslogado abre login)
+// Clique em Meu Painel no menu
 openDashboardNavBtn?.addEventListener("click", () => {
   toggleMenu(true);
   const usuario = getUsuarioLogado();
@@ -196,6 +161,13 @@ openDashboardNavBtn?.addEventListener("click", () => {
     toggleAuthModal(true);
   }
 });
+
+
+
+
+
+
+
 
 // Ação do botão no Hero
 heroActionBtn?.addEventListener("click", () => {
