@@ -1,5 +1,13 @@
+import { loginComGoogle, logoutUsuario, vigiarSessao } from "./auth.js";
+import { 
+  toggleAuthModal, 
+  toggleDashboardModal, 
+  togglePublishModal, 
+  toggleCartaoModal, 
+  initModalListeners 
+} from "./modal.js";
 /* =========================================================================
-   MAIN MODULE - CONTROLE DE INTERFACE, MENU MOBILE E GERAÇÃO DE CARTÕES
+   MAIN MODULE - CONTROLE DE INTERFACE, LOGIN GOOGLE E PAINEL DO USUÁRIO
    ========================================================================= */
 
 // --- 1. GERENCIAMENTO DO MENU MOBILE (HAMBÚRGUER) ---
@@ -7,83 +15,349 @@ const hamburgerBtn = document.getElementById("hamburgerBtn");
 const navMenu = document.getElementById("navMenu");
 const menuBackdrop = document.getElementById("menuBackdrop");
 
-// Função que abre/fecha o menu mobile via clique
 function toggleMenu(forceClose = false) {
   const isOpen = forceClose ? false : !navMenu?.classList.contains("open");
   navMenu?.classList.toggle("open", isOpen);
   menuBackdrop?.classList.toggle("open", isOpen);
-  // Troca o ícone: se aberto vira "X", se fechado vira "três traços"
   const icon = hamburgerBtn?.querySelector("i");
-  if (icon) {
-    icon.className = isOpen ? "bi bi-x-lg" : "bi bi-list";
-  }
+  if (icon) icon.className = isOpen ? "bi bi-x-lg" : "bi bi-list";
 }
-// Força o menu mobile e o backdrop a iniciarem 100% fechados ao carregar a página
+
 toggleMenu(true);
-// --- SISTEMA DE TOAST NOTIFICATION ---
+
+// --- TOAST NOTIFICATION ---
 const toastNotification = document.getElementById("toastNotification");
 const toastMessage = document.getElementById("toastMessage");
 let toastTimeout;
 
 export function showToast(mensagem) {
   if (!toastNotification || !toastMessage) return;
-
   clearTimeout(toastTimeout);
   toastMessage.textContent = mensagem;
   toastNotification.classList.add("show");
-
   toastTimeout = setTimeout(() => {
     toastNotification.classList.remove("show");
   }, 3200);
 }
-// Ao clicar no botão (seja hambúrguer ou o X), abre ou fecha
+
 hamburgerBtn?.addEventListener("click", (e) => {
   e.stopPropagation();
   toggleMenu();
 });
 
-// Fecha ao clicar fora (no fundo escuro)
 menuBackdrop?.addEventListener("click", () => toggleMenu(true));
-
-// Fecha ao clicar em qualquer item da lista
 document.querySelectorAll(".nav-links a").forEach((link) => {
   link.addEventListener("click", () => toggleMenu(true));
 });
 
-// --- 2. GERENCIAMENTO DO MODAL "DIVULGUE" ---
-const publishModal = document.getElementById("publishModal");
-const openPublishModalBtn = document.getElementById("openPublishModalBtn");
-const heroPublishBtn = document.getElementById("heroPublishBtn");
-const closePublishModalBtn = document.getElementById("closePublishModalBtn");
 
-function togglePublishModal(isOpen) {
-  publishModal?.classList.toggle("open", isOpen);
-  document.body.style.overflow = isOpen ? "hidden" : "";
+
+const openAuthModalBtn = document.getElementById("openAuthModalBtn");
+const openMobileAuthModalBtn = document.getElementById("openMobileAuthModalBtn");
+const googleLoginBtn = document.getElementById("googleLoginBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const navAuthItem = document.getElementById("navAuthItem");
+const mobileAuthItem = document.getElementById("mobileAuthItem");
+const navLogoutItem = document.getElementById("navLogoutItem");
+const navPanelItem = document.getElementById("navPanelItem");
+const openDashboardNavBtn = document.getElementById("openDashboardNavBtn");
+const navUserBadgeItem = document.getElementById("navUserBadgeItem");
+const mobileUserBadgeItem = document.getElementById("mobileUserBadgeItem");
+const navUserPhoto = document.getElementById("navUserPhoto");
+const mobileUserPhoto = document.getElementById("mobileUserPhoto");
+const navUserFirstName = document.getElementById("navUserFirstName");
+const mobileUserFirstName = document.getElementById("mobileUserFirstName");
+const heroActionBtn = document.getElementById("heroActionBtn");
+const heroActionText = document.getElementById("heroActionText");
+
+function getUsuarioLogado() {
+  const dados = localStorage.getItem("profissionaisDF_usuario");
+  return dados ? JSON.parse(dados) : null;
 }
 
-openPublishModalBtn?.addEventListener("click", () => {
-  toggleMenu(false);
-  togglePublishModal(true);
+function setUsuarioLogado(usuario) {
+  if (usuario) {
+    localStorage.setItem("profissionaisDF_usuario", JSON.stringify(usuario));
+  } else {
+    localStorage.removeItem("profissionaisDF_usuario");
+  }
+  atualizarInterfaceSessao();
+}
+
+// Simulação de login direto com Google (ao plugar Firebase, usará signInWithPopup)
+
+// Login oficial com popup do Google
+googleLoginBtn?.addEventListener("click", async () => {
+  try {
+    const usuario = await loginComGoogle();
+    setUsuarioLogado(usuario);
+    toggleAuthModal(false);
+    showToast(`Bem-vindo, ${usuario.nome}!`);
+    abrirPainelUsuario();
+  } catch (err) {
+    showToast("Falha ao entrar com o Google.");
+  }
 });
 
-heroPublishBtn?.addEventListener("click", () => togglePublishModal(true));
-closePublishModalBtn?.addEventListener("click", () => togglePublishModal(false));
-
-publishModal?.addEventListener("click", (e) => {
-  if (e.target === publishModal) togglePublishModal(false);
+// Logout oficial
+logoutBtn?.addEventListener("click", async () => {
+  try {
+    await logoutUsuario();
+    setUsuarioLogado(null);
+    toggleMenu(true);
+    showToast("Sessão finalizada.");
+    filtrarCardsVitrine(true);
+  } catch (err) {
+    showToast("Erro ao finalizar sessão.");
+  }
 });
 
-// --- 3. CRIAÇÃO E INJEÇÃO DINÂMICA DO CARD NO INDEX ---
+// Sincronização contínua com a sessão oficial do Firebase
+vigiarSessao((usuario) => {
+  setUsuarioLogado(usuario);
+});
+
+
+function atualizarInterfaceSessao() {
+  const usuario = getUsuarioLogado();
+  const isMobile = window.matchMedia("(max-width: 768px)").matches;
+
+  if (navPanelItem) navPanelItem.style.display = "inline-block";
+
+  if (usuario) {
+    // Desktop: se estiver no celular (isMobile), o li dentro da lista fica "none" para não duplicar
+    if (navLogoutItem) navLogoutItem.style.display = "inline-block";
+    if (navUserBadgeItem) navUserBadgeItem.style.display = isMobile ? "none" : "inline-flex";
+    if (navAuthItem) navAuthItem.style.display = "none";
+
+    // Mobile (topo fixo)
+    if (mobileUserBadgeItem) mobileUserBadgeItem.style.display = isMobile ? "flex" : "none";
+    if (mobileAuthItem) mobileAuthItem.style.display = "none";
+
+    const foto = usuario.foto || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120";
+    const nome = (usuario.nome || "Usuário").trim();
+
+    if (navUserPhoto) navUserPhoto.src = foto;
+    if (mobileUserPhoto) mobileUserPhoto.src = foto;
+
+    if (navUserFirstName) navUserFirstName.textContent = nome;
+    if (mobileUserFirstName) mobileUserFirstName.textContent = nome;
+
+    if (heroActionText) heroActionText.textContent = "Acessar Meu Painel";
+  } else {
+    // Desktop: se for celular, o item entrar da lista também não duplica
+    if (navLogoutItem) navLogoutItem.style.display = "none";
+    if (navUserBadgeItem) navUserBadgeItem.style.display = "none";
+    if (navAuthItem) navAuthItem.style.display = isMobile ? "none" : "inline-block";
+
+    // Mobile (topo fixo)
+    if (mobileUserBadgeItem) mobileUserBadgeItem.style.display = "none";
+    if (mobileAuthItem) mobileAuthItem.style.display = isMobile ? "flex" : "none";
+
+    if (heroActionText) heroActionText.textContent = "Divulgue sua Profissão";
+  }
+}
+
+// Reavalia a interface sem recarregar caso a tela seja redimensionada
+window.addEventListener("resize", () => {
+  atualizarInterfaceSessao();
+});
+
+
+
+
+
+
+
+
+// Abrir modal de Login
+openAuthModalBtn?.addEventListener("click", () => {
+  toggleMenu(true);
+  toggleAuthModal(true);
+});
+openMobileAuthModalBtn?.addEventListener("click", () => {
+  toggleMenu(true);
+  toggleAuthModal(true);
+});
+
+mobileUserBadgeItem?.addEventListener("click", () => {
+  toggleMenu(true);
+  abrirPainelUsuario();
+});
+
+// Abrir Meu Painel pelo link no menu
+// Clique em Meu Painel no menu (se estiver logado abre o painel, se deslogado abre login)
+openDashboardNavBtn?.addEventListener("click", () => {
+  toggleMenu(true);
+  const usuario = getUsuarioLogado();
+  if (usuario) {
+    abrirPainelUsuario();
+  } else {
+    toggleAuthModal(true);
+  }
+});
+
+// Ação do botão no Hero
+heroActionBtn?.addEventListener("click", () => {
+  const usuario = getUsuarioLogado();
+  if (usuario) abrirPainelUsuario();
+  else toggleAuthModal(true);
+});
+
+// --- 3. MODAL PAINEL DO USUÁRIO ---
+
+// --- 3. PAINEL DO USUÁRIO ---
+const dashUserName = document.getElementById("dashUserName");
+const dashUserEmail = document.getElementById("dashUserEmail");
+const dashUserAvatar = document.getElementById("dashUserAvatar");
+const dashCardViewBlock = document.getElementById("dashCardViewBlock");
+const dashNoCardBlock = document.getElementById("dashNoCardBlock");
+const dashCardPreviewContainer = document.getElementById("dashCardPreviewContainer");
+const btnToggleStatus = document.getElementById("btnToggleStatus");
+const toggleStatusLabel = document.getElementById("toggleStatusLabel");
+const btnEditarMeuCartao = document.getElementById("btnEditarMeuCartao");
+const btnExcluirMeuCartao = document.getElementById("btnExcluirMeuCartao");
+const btnCriarPrimeiroCartao = document.getElementById("btnCriarPrimeiroCartao");
+
+
+
+
+function getMeuCartao() {
+  const usuario = getUsuarioLogado();
+  if (!usuario) return null;
+  const cardsSalvos = JSON.parse(localStorage.getItem("profissionaisDF_cards")) || [];
+  return cardsSalvos.find((c) => c.email.toLowerCase() === usuario.email.toLowerCase()) || null;
+}
+
+function abrirPainelUsuario() {
+  const usuario = getUsuarioLogado();
+  if (!usuario) {
+    toggleAuthModal(true);
+    return;
+  }
+
+  if (dashUserName) dashUserName.textContent = usuario.nome;
+  if (dashUserEmail) dashUserEmail.textContent = usuario.email;
+  if (dashUserAvatar) dashUserAvatar.src = usuario.foto;
+
+  const meuCartao = getMeuCartao();
+
+  if (meuCartao) {
+    if (dashCardViewBlock) dashCardViewBlock.style.display = "block";
+    if (dashNoCardBlock) dashNoCardBlock.style.display = "none";
+
+    const statusBadge = meuCartao.status === "publicado"
+      ? '<span class="status-badge published"><i class="bi bi-check-circle-fill"></i> Publicado na Vitrine</span>'
+      : '<span class="status-badge paused"><i class="bi bi-pause-circle-fill"></i> Cartão Pausado (Oculto)</span>';
+
+    if (dashCardPreviewContainer) {
+      dashCardPreviewContainer.innerHTML = statusBadge + criarCardVisitaHTML(meuCartao);
+    }
+
+    if (meuCartao.status === "publicado") {
+      btnToggleStatus.className = "dash-btn btn-toggle-status paused";
+      toggleStatusLabel.textContent = "Pausar Cartão";
+    } else {
+      btnToggleStatus.className = "dash-btn btn-toggle-status";
+      toggleStatusLabel.textContent = "Publicar Cartão";
+    }
+  } else {
+    if (dashCardViewBlock) dashCardViewBlock.style.display = "none";
+    if (dashNoCardBlock) dashNoCardBlock.style.display = "block";
+  }
+
+  toggleDashboardModal(true);
+}
+
+// Botão Alternar Status (Publicado / Pausado)
+btnToggleStatus?.addEventListener("click", () => {
+  const usuario = getUsuarioLogado();
+  if (!usuario) return;
+
+  let cards = JSON.parse(localStorage.getItem("profissionaisDF_cards")) || [];
+  const idx = cards.findIndex((c) => c.email.toLowerCase() === usuario.email.toLowerCase());
+
+  if (idx !== -1) {
+    cards[idx].status = cards[idx].status === "publicado" ? "pausado" : "publicado";
+    localStorage.setItem("profissionaisDF_cards", JSON.stringify(cards));
+    showToast(cards[idx].status === "publicado" ? "Cartão publicado na vitrine!" : "Cartão pausado.");
+    abrirPainelUsuario();
+    filtrarCardsVitrine(true);
+  }
+});
+
+// Botão Excluir Cartão
+btnExcluirMeuCartao?.addEventListener("click", () => {
+  const usuario = getUsuarioLogado();
+  if (!usuario) return;
+
+  if (confirm("Tem certeza que deseja excluir seu cartão de visita?")) {
+    let cards = JSON.parse(localStorage.getItem("profissionaisDF_cards")) || [];
+    cards = cards.filter((c) => c.email.toLowerCase() !== usuario.email.toLowerCase());
+    localStorage.setItem("profissionaisDF_cards", JSON.stringify(cards));
+    showToast("Cartão excluído com sucesso.");
+    abrirPainelUsuario();
+    filtrarCardsVitrine(true);
+  }
+});
+
+// --- 4. FORMULÁRIO DO CARTÃO (CRIAÇÃO / EDIÇÃO) ---
+// --- 4. FORMULÁRIO DO CARTÃO (CRIAÇÃO / EDIÇÃO) ---
 const publishForm = document.getElementById("publishForm");
-const cardsGrid = document.getElementById("cardsGrid");
-
-
-
-
-// --- PRÉ-VISUALIZAÇÃO IMEDIATA DA FOTO SELECIONADA NO MODAL ---
+const formModalTitle = document.getElementById("formModalTitle");
+const formModalSub = document.getElementById("formModalSub");
 const fotoInput = document.getElementById("fotoInput");
 const uploadPreviewImg = document.getElementById("uploadPreviewImg");
 const uploadPlaceholderIcon = document.getElementById("uploadPlaceholderIcon");
+
+function prepararFormularioCartao() {
+  const usuario = getUsuarioLogado();
+  if (!usuario) return;
+
+  const meuCartao = getMeuCartao();
+  publishForm?.reset();
+
+  const emailInput = document.getElementById("emailInput");
+  if (emailInput) {
+    emailInput.value = usuario.email;
+    emailInput.readOnly = true;
+  }
+
+  if (meuCartao) {
+    if (formModalTitle) formModalTitle.textContent = "Editar Meu Cartão";
+    if (formModalSub) formModalSub.textContent = "Atualize suas informações e salve as alterações.";
+    document.getElementById("nomeInput").value = meuCartao.nome || "";
+    document.getElementById("experienciaInput").value = meuCartao.experiencia !== undefined ? meuCartao.experiencia : "";
+    document.getElementById("cnhInput").value = meuCartao.cnh || "";
+    document.getElementById("cidadeInput").value = meuCartao.cidade || "";
+    document.getElementById("profissaoInput").value = meuCartao.profissao || "";
+    document.getElementById("bioInput").value = meuCartao.bio || "";
+    document.getElementById("telefoneInput").value = meuCartao.telefone || "";
+    document.getElementById("instagramInput").value = meuCartao.instagram || "";
+    document.getElementById("linkedinInput").value = meuCartao.linkedin || "";
+
+    if (uploadPreviewImg && meuCartao.fotoUrl) {
+      uploadPreviewImg.src = meuCartao.fotoUrl;
+      uploadPreviewImg.style.display = "block";
+    }
+    if (uploadPlaceholderIcon) uploadPlaceholderIcon.style.display = "none";
+  } else {
+    if (formModalTitle) formModalTitle.textContent = "Criar Meu Cartão";
+    if (formModalSub) formModalSub.textContent = "Preencha seus dados para publicar seu cartão no DF.";
+    document.getElementById("nomeInput").value = usuario.nome || "";
+    if (uploadPreviewImg) {
+      uploadPreviewImg.src = "";
+      uploadPreviewImg.style.display = "none";
+    }
+    if (uploadPlaceholderIcon) uploadPlaceholderIcon.style.display = "block";
+  }
+
+  toggleDashboardModal(false);
+  togglePublishModal(true);
+}
+
+btnEditarMeuCartao?.addEventListener("click", prepararFormularioCartao);
+btnCriarPrimeiroCartao?.addEventListener("click", prepararFormularioCartao);
 
 fotoInput?.addEventListener("change", (e) => {
   const file = e.target.files[0];
@@ -95,15 +369,12 @@ fotoInput?.addEventListener("change", (e) => {
       uploadPreviewImg.src = evt.target.result;
       uploadPreviewImg.style.display = "block";
     }
-    if (uploadPlaceholderIcon) {
-      uploadPlaceholderIcon.style.display = "none";
-    }
+    if (uploadPlaceholderIcon) uploadPlaceholderIcon.style.display = "none";
   };
   reader.readAsDataURL(file);
 });
 
-// --- CONTROLE DO ACCORDION DE CIDADES (DF) ---
-// --- ARRAYS E DADOS ---
+// --- ARRAYS E ACCORDIONS (DF) ---
 export const CIDADES_DF = [
   "Águas Claras", "Arniqueira", "Asa Norte", "Asa Sul", "Brazlândia", "Candangolândia", "Ceilândia", "Cruzeiro", "Fercal", "Gama",
   "Guará", "Guará II", "Itapoã", "Jardim Botânico", "Lago Norte", "Lago Sul", "Núcleo Bandeirante", "Paranoá", "Park Way", "Planaltina",
@@ -124,7 +395,7 @@ export const PROFISSOES_LISTA = [
   "Departamento pessoal,RH", "Diarista,Faxineiro(a)", "DJ", "Dublador(a)", "Economista", "Editor(a) de Vídeo",
   "Eletricista Automotivo", "Eletricista Predial,Residencial", "Encanador", "Encanador Industrial", "Enfermeiro(a)",
   "Engenheiro(a) Civil", "Engenheiro(a) Eletricista", "Engenheiro(a) Mecânico", "Engenheiro(a) ambiental",
-   "Esteticista", "Farmacêutico(a)", "Fisioterapeuta", "Fonoaudiólogo(a)",
+  "Esteticista", "Farmacêutico(a)", "Fisioterapeuta", "Fonoaudiólogo(a)",
   "Fotógrafo(a)", "Garçom,Garçonete", "Gesseiro", "Guia de Turismo", "Impermeabilizador", "Instalador de Ar-Condicionado",
   "Instalad: de Câmeras", "Instalad: de Drywall", "Instal: de Energia Solar", "Instalador de Insulfilm",
   "Instalad: de Papel de Parede", "Instalad: de Piso Laminado", "Instalad: de Pisos,Revestimentos",
@@ -139,11 +410,11 @@ export const PROFISSOES_LISTA = [
   "Personal Trainer", "Pintor Automotivo", "Pintor de Obras,Residencial", "Piscineiro", "Podólogo(a)", "Polidor Automotivo",
   "Poceiro (Abertura de Poços)", "Professor(a)", "Psicólogo(a)", "Psicopedagogo(a)", "Publicitário(a)", "Recepcionista",
   "Recreador(a) Infantil", "Redator(a)", "Sapateiro", "Segurança,Vigilante", "Serviços Gerais", "Serralheiro",
-   "Social Media", "Soldador", "Tapeceiro / Estofador", "Tatuador(a)", "Técnico de Celular",
+  "Social Media", "Soldador", "Tapeceiro / Estofador", "Tatuador(a)", "Técnico de Celular",
   "Eletrotécnico", "Téc: de Enfermagem", "Téc: em Edificações", "Téc: em Segurança do Trabalho", "Telhadista",
   "Terapeuta Holístico", "Terapeuta Ocupacional", "Topógrafo(a)", "Tosador / Pet Care", "Tradutor(a)",
   "Veterinário(a)", "Vidraceiro", "Vendedor(a),Representante Comercial",
- "Outros Serviços"
+  "Outros Serviços"
 ];
 
 export const CNH_MOBILIDADE_LISTA = [
@@ -154,7 +425,6 @@ export const CNH_MOBILIDADE_LISTA = [
   "Transporte Público"
 ];
 
-// --- CONTROLE DO ACCORDION DE CIDADES (DF) -------------------------------
 const cityAccordionHeader = document.getElementById("cityAccordionHeader");
 const cityAccordionDrawer = document.getElementById("cityAccordionDrawer");
 const cityArrowIcon = document.getElementById("cityArrowIcon");
@@ -173,7 +443,6 @@ if (cityListWrapper) {
   ).join("");
 }
 
-// --- SELEÇÃO DE CIDADE ---
 cityListWrapper?.addEventListener("click", (e) => {
   const btn = e.target.closest(".city-option");
   if (!btn) return;
@@ -182,7 +451,6 @@ cityListWrapper?.addEventListener("click", (e) => {
   toggleCityAccordion(true);
 });
 
-// --- CONTROLE DO ACCORDION DE PROFISSÕES ---
 const profissaoAccordionHeader = document.getElementById("profissaoAccordionHeader");
 const profissaoAccordionDrawer = document.getElementById("profissaoAccordionDrawer");
 const profissaoArrowIcon = document.getElementById("profissaoArrowIcon");
@@ -209,7 +477,6 @@ profissaoListWrapper?.addEventListener("click", (e) => {
   toggleProfissaoAccordion(true);
 });
 
-// --- CONTROLE DO ACCORDION DE HABILITAÇÃO / MOBILIDADE ---
 const cnhAccordionHeader = document.getElementById("cnhAccordionHeader");
 const cnhAccordionDrawer = document.getElementById("cnhAccordionDrawer");
 const cnhArrowIcon = document.getElementById("cnhArrowIcon");
@@ -236,7 +503,6 @@ cnhListWrapper?.addEventListener("click", (e) => {
   toggleCnhAccordion(true);
 });
 
-// --- CLIQUES DE ABERTURA COM FECHAMENTO CRUZADO ENTRE OS 3 ---
 cityAccordionHeader?.addEventListener("click", () => {
   toggleProfissaoAccordion(true);
   toggleCnhAccordion(true);
@@ -255,7 +521,7 @@ cnhAccordionHeader?.addEventListener("click", () => {
   toggleCnhAccordion();
 });
 
-// --- FUNÇÃO PARA GERAR O HTML DO CARD DE VISITA ---
+// --- RENDER DO CARD DE VISITA ---
 export function criarCardVisitaHTML({ nome, experiencia, idade, cidade, profissao, bio, cnh, email, telefone, fotoUrl, instagram, linkedin }) {
   const expValor = experiencia !== undefined ? experiencia : idade;
   const textoExp = expValor == 1 ? "1 ano exp." : `${expValor} anos exp.`;
@@ -286,7 +552,6 @@ export function criarCardVisitaHTML({ nome, experiencia, idade, cidade, profissa
             <span class="exp-destaque">${textoExp}</span>
           </div>
 
-          <!-- BOTÃO VER MAIS LOGO ABAIXO DA CIDADE E EXP -->
           <button type="button" 
                   class="btn-abrir-cartao" 
                   data-nome="${nome}"
@@ -308,36 +573,25 @@ export function criarCardVisitaHTML({ nome, experiencia, idade, cidade, profissa
   `;
 }
 
-// --- MÁSCARA AUTOMÁTICA OBRIGATÓRIA (61) + 9 DÍGITOS ---
+// --- MÁSCARA TELEFONE (DF) ---
 const telefoneInput = document.getElementById("telefoneInput");
 
 telefoneInput?.addEventListener("input", (e) => {
-  // Pega apenas os números digitados
   let apenasNumeros = e.target.value.replace(/\D/g, "");
-
-  // Se o usuário já digitou começando com 61, removemos para evitar duplicação (6161...)
-  if (apenasNumeros.startsWith("61")) {
-    apenasNumeros = apenasNumeros.slice(2);
-  }
-
-  // Limita estritamente a 9 dígitos de número
+  if (apenasNumeros.startsWith("61")) apenasNumeros = apenasNumeros.slice(2);
   apenasNumeros = apenasNumeros.slice(0, 9);
 
   if (apenasNumeros.length === 0) {
     e.target.value = "";
     return;
   }
-
-  // Monta a formatação: (61) 9XXXX-XXXX
   if (apenasNumeros.length <= 5) {
     e.target.value = `(61) ${apenasNumeros}`;
   } else {
     e.target.value = `(61) ${apenasNumeros.slice(0, 5)}-${apenasNumeros.slice(5)}`;
   }
 });
-// Intercepta o envio do formulário, lê a imagem e insere o card no topo da vitrine
-// --- FUNÇÃO PARA COMPACTAR IMAGENS ANTES DE SALVAR NO LOCALSTORAGE ---
-// Evita estourar o limite de 5MB do navegador ao salvar fotos em Base64
+
 function redimensionarFoto(arquivo, callback) {
   const reader = new FileReader();
   reader.onload = (e) => {
@@ -345,9 +599,7 @@ function redimensionarFoto(arquivo, callback) {
     img.onload = () => {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
-
-      // Define tamanho máximo fixo de 280x280 (resolução ideal para o avatar)
-      const maxDim = 280;
+      const maxDim = 160;
       let width = img.width;
       let height = img.height;
 
@@ -366,66 +618,50 @@ function redimensionarFoto(arquivo, callback) {
       canvas.width = width;
       canvas.height = height;
       ctx.drawImage(img, 0, 0, width, height);
-
-      // Exporta em JPEG otimizado
-      callback(canvas.toDataURL("image/jpeg", 0.75));
+      callback(canvas.toDataURL("image/jpeg", 0.65));
     };
     img.src = e.target.result;
   };
   reader.readAsDataURL(arquivo);
 }
 
-// --- FUNÇÃO PARA CARREGAR OS CARDS SALVOS ASSIM QUE O SITE ABRE ---
-function carregarCardsSalvos() {
-  try {
-    const cardsSalvos = JSON.parse(localStorage.getItem("profissionaisDF_cards")) || [];
-    // Percorre cada profissional salvo e insere no topo da vitrine
-    cardsSalvos.forEach((dados) => {
-      const cardHTML = criarCardVisitaHTML(dados);
-      cardsGrid?.insertAdjacentHTML("afterbegin", cardHTML);
-    });
-  } catch (erro) {
-    console.error("Erro ao carregar profissionais salvos:", erro);
-  }
-}
-
-// Executa o carregamento inicial dos cartões fixos
-// Executa o carregamento inicial e inicia a paginação
-carregarCardsSalvos();
-
-
-// --- ENVIO DO FORMULÁRIO COM PERSISTÊNCIA NO LOCALSTORAGE ---
+// --- SUBMISSÃO DO FORMULÁRIO DO CARTÃO ---
 publishForm?.addEventListener("submit", (e) => {
   e.preventDefault();
 
-const fotoArquivo = document.getElementById("fotoInput").files[0];
+  const usuario = getUsuarioLogado();
+  if (!usuario) return;
+
+  const fotoArquivo = document.getElementById("fotoInput").files[0];
   const nome = document.getElementById("nomeInput").value.trim();
-const experiencia = document.getElementById("experienciaInput").value.trim();
+  const experiencia = document.getElementById("experienciaInput").value.trim();
   const cnh = document.getElementById("cnhInput")?.value.trim() || "";
   const cidade = document.getElementById("cidadeInput").value.trim();
- const profissao = document.getElementById("profissaoInput").value.trim();
+  const profissao = document.getElementById("profissaoInput").value.trim();
   const bio = document.getElementById("bioInput")?.value.trim() || "";
-  const email = document.getElementById("emailInput").value.trim();
+  const email = usuario.email;
   const telefone = document.getElementById("telefoneInput").value.trim();
   const instagram = document.getElementById("instagramInput")?.value.trim() || "";
   const linkedin = document.getElementById("linkedinInput")?.value.trim() || "";
 
-  if (!fotoArquivo) {
-    alert("Por favor, selecione uma foto.");
+  let cards = JSON.parse(localStorage.getItem("profissionaisDF_cards")) || [];
+  const idx = cards.findIndex((c) => c.email.toLowerCase() === email.toLowerCase());
+  const cartaoExistente = idx !== -1 ? cards[idx] : null;
+
+  if (!fotoArquivo && !cartaoExistente?.fotoUrl) {
+    showToast("Por favor, selecione uma foto para o seu cartão.");
     return;
   }
 
-  // Validação: DDD 61 + 9 dígitos (11 números ao todo)
   const numerosTelefone = telefone.replace(/\D/g, "");
   if (numerosTelefone.length !== 11 || !numerosTelefone.startsWith("61")) {
-    alert("Por favor, digite um telefone válido do DF com DDD (61) e 9 dígitos completos.");
+    showToast("Digite um telefone válido do DF com DDD (61) e 9 dígitos.");
     telefoneInput?.focus();
     return;
   }
 
-  // Compacta e processa a imagem
-  redimensionarFoto(fotoArquivo, (fotoUrl) => {
-const dadosNovoProfissional = {
+  const salvarCardFinal = (fotoUrlFinal) => {
+    const dadosCard = {
       nome,
       experiencia,
       cnh,
@@ -434,80 +670,37 @@ const dadosNovoProfissional = {
       bio,
       email,
       telefone,
-      fotoUrl,
+      fotoUrl: fotoUrlFinal,
       instagram,
-      linkedin
+      linkedin,
+      status: cartaoExistente ? cartaoExistente.status : "publicado" // Nasce publicado por padrão
     };
 
-    // 1. Gera o HTML e renderiza na tela imediatamente
-    const novoCardHTML = criarCardVisitaHTML(dadosNovoProfissional);
-    cardsGrid.insertAdjacentHTML("afterbegin", novoCardHTML);
-
-    // 2. Salva permanentemente no navegador (localStorage)
-    try {
-      const cardsAtuais = JSON.parse(localStorage.getItem("profissionaisDF_cards")) || [];
-      cardsAtuais.push(dadosNovoProfissional);
-      localStorage.setItem("profissionaisDF_cards", JSON.stringify(cardsAtuais));
-    } catch (err) {
-      console.warn("Aviso: Limite de armazenamento local atingido.", err);
+    if (idx !== -1) {
+      cards[idx] = dadosCard;
+      showToast("Cartão atualizado com sucesso!");
+    } else {
+      cards.unshift(dadosCard);
+      showToast("Cartão criado e publicado na vitrine!");
     }
 
-    // 3. Limpa o formulário, accordions e pré-visualizações
-    publishForm.reset();
-    toggleCityAccordion(true);
-    toggleProfissaoAccordion(true);
-    if (uploadPreviewImg) {
-      uploadPreviewImg.src = "";
-      uploadPreviewImg.style.display = "none";
-    }
-    if (uploadPlaceholderIcon) {
-      uploadPlaceholderIcon.style.display = "block";
-    }
-
-    // 4. Fecha o modal e rola suavemente até o novo card
- // 4. Recalcula a paginação para exibir o novo card na página 1 e fecha o modal
-    filtrarCardsVitrine(true);
+    localStorage.setItem("profissionaisDF_cards", JSON.stringify(cards));
     togglePublishModal(false);
-    cardsGrid.scrollIntoView({ behavior: "smooth", block: "start" });
-  });
+    abrirPainelUsuario();
+    filtrarCardsVitrine(true);
+  };
+
+  if (fotoArquivo) {
+    redimensionarFoto(fotoArquivo, (novaFotoUrl) => {
+      salvarCardFinal(novaFotoUrl);
+    });
+  } else {
+    salvarCardFinal(cartaoExistente.fotoUrl);
+  }
 });
 
-
-// --- GERENCIAMENTO DO MODAL "CRIAR CONTA" ---
-const registerModal = document.getElementById("registerModal");
-const openRegisterModalBtn = document.getElementById("openRegisterModalBtn");
-const closeRegisterModalBtn = document.getElementById("closeRegisterModalBtn");
-const registerForm = document.getElementById("registerForm");
-
-function toggleRegisterModal(isOpen) {
-  registerModal?.classList.toggle("open", isOpen);
-  document.body.style.overflow = isOpen ? "hidden" : "";
-}
-
-// Abre o modal de cadastro e fecha o menu mobile caso esteja aberto
-openRegisterModalBtn?.addEventListener("click", () => {
-  toggleMenu(true);
-  toggleRegisterModal(true);
-});
-
-// Fecha no botão X do modal
-closeRegisterModalBtn?.addEventListener("click", () => toggleRegisterModal(false));
-
-// Fecha ao clicar fora (no fundo escuro)
-registerModal?.addEventListener("click", (e) => {
-  if (e.target === registerModal) toggleRegisterModal(false);
-});
-
-// Envio do formulário
-registerForm?.addEventListener("submit", (e) => {
-  e.preventDefault();
-  const email = document.getElementById("regEmailInput")?.value;
-  alert(`Cadastro recebido para: ${email}\nEm breve ativaremos a autenticação!`);
-  registerForm.reset();
-  toggleRegisterModal(false);
-});
-
-// --- SISTEMA DE BUSCA E FILTRO POR PROFISSÃO ---
+// --- BUSCA E VITRINE (EXIBE APENAS CARTÕES COM STATUS 'PUBLICADO') ---
+const cardsGrid = document.getElementById("cardsGrid");
 const filtroProfissaoInput = document.getElementById("filtroProfissaoInput");
 const limparBuscaBtn = document.getElementById("limparBuscaBtn");
 
@@ -519,10 +712,6 @@ function normalizarTexto(txt) {
     .trim();
 }
 
-
-// --- SISTEMA DE FILTRO UNIFICADO: PROFISSÃO E CIDADE/RA (DF) ---
-// ================= SISTEMA DE PAGINAÇÃO E BUSCA INTEGRADA =================
-// ================= SISTEMA DE PAGINAÇÃO E BUSCA INTEGRADA =================
 const CARDS_PAGINA_1 = 6;
 const CARDS_DEMAIS_PAGINAS = 12;
 let paginaAtual = 1;
@@ -532,7 +721,6 @@ const paginationPagesList = document.getElementById("paginationPagesList");
 const btnPaginaAnterior = document.getElementById("btnPaginaAnterior");
 const btnPaginaProxima = document.getElementById("btnPaginaProxima");
 
-// Função matemática que calcula o total de páginas considerando 6 na primeira e 12 nas demais
 function calcularTotalPaginas(totalItens) {
   if (totalItens <= 0) return 0;
   if (totalItens <= CARDS_PAGINA_1) return 1;
@@ -540,30 +728,13 @@ function calcularTotalPaginas(totalItens) {
   return 1 + Math.ceil(itensRestantes / CARDS_DEMAIS_PAGINAS);
 }
 
-// Atualiza quais cards ficam visíveis conforme a página selecionada
-
-// Atualiza quais cards ficam visíveis conforme a página selecionada
 function renderizarPagina(cardsFiltrados) {
-  const todosCards = cardsGrid?.querySelectorAll(".card-visita");
   const total = cardsFiltrados.length;
   const totalPaginas = calcularTotalPaginas(total);
 
-  // Garante que a página atual seja válida
   if (paginaAtual > totalPaginas) paginaAtual = totalPaginas || 1;
   if (paginaAtual < 1) paginaAtual = 1;
 
-  // Mostra a busca e o botão divulgue apenas na página 1; oculta da página 2 em diante
-  const heroActions = document.querySelector(".hero-actions");
-  if (heroActions) {
-    heroActions.style.display = paginaAtual === 1 ? "flex" : "none";
-  }
-
-  // Oculta todos os cards antes de exibir a fatia da página atual
-  todosCards?.forEach((card) => {
-    card.style.display = "none";
-  });
-
-  // Calcula o início e o fim da fatia conforme a página
   let inicio = 0;
   let fim = CARDS_PAGINA_1;
 
@@ -573,41 +744,22 @@ function renderizarPagina(cardsFiltrados) {
   }
 
   const cardsPagina = cardsFiltrados.slice(inicio, fim);
-
-  cardsPagina.forEach((card) => {
-    card.style.display = ""; // Mantém o display padrão do grid
-  });
+  if (cardsGrid) {
+    cardsGrid.innerHTML = cardsPagina.map((dados) => criarCardVisitaHTML(dados)).join("");
+  }
 
   desenharControlesPaginacao(totalPaginas);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Cria as bolinhas de números e controla o estado dos botões Anterior/Próxima
 function desenharControlesPaginacao(totalPaginas) {
   if (!paginationContainer || !paginationPagesList) return;
 
-  // Se não houver itens ou couber tudo em 1 página só, esconde a barra
   if (totalPaginas <= 1) {
     paginationContainer.style.display = "none";
     return;
   }
   paginationContainer.style.display = "flex";
 
-  // Desenha os botões numéricos
   paginationPagesList.innerHTML = "";
   for (let i = 1; i <= totalPaginas; i++) {
     const btnNum = document.createElement("button");
@@ -618,118 +770,85 @@ function desenharControlesPaginacao(totalPaginas) {
       if (paginaAtual !== i) {
         paginaAtual = i;
         filtrarCardsVitrine(false);
-        rolarParaTopoVitrine();
+        document.getElementById("vitrine")?.scrollIntoView({ behavior: "smooth", block: "start" });
       }
     });
     paginationPagesList.appendChild(btnNum);
   }
 
-  // Desativa os botões quando atinge o limite
   if (btnPaginaAnterior) btnPaginaAnterior.disabled = paginaAtual === 1;
   if (btnPaginaProxima) btnPaginaProxima.disabled = paginaAtual === totalPaginas;
 }
 
-// Rola a tela suavemente para a vitrine ao trocar de página
-function rolarParaTopoVitrine() {
-  const vitrineSecao = document.getElementById("vitrine");
-  vitrineSecao?.scrollIntoView({ behavior: "smooth", block: "start" });
-}
-
-// Botões Anterior e Próxima
 btnPaginaAnterior?.addEventListener("click", () => {
   if (paginaAtual > 1) {
     paginaAtual--;
     filtrarCardsVitrine(false);
-    rolarParaTopoVitrine();
+    document.getElementById("vitrine")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 });
 
 btnPaginaProxima?.addEventListener("click", () => {
   const termo = normalizarTexto(filtroProfissaoInput?.value || "");
-  const todosCards = Array.from(cardsGrid?.querySelectorAll(".card-visita") || []);
-  
-  const cardsValidos = todosCards.filter((card) => {
-    const nomeTexto = card.querySelector(".card-nome")?.textContent || "";
-    const profissaoTexto = card.querySelector(".card-profissao-destaque")?.textContent || "";
-    const cidadeTexto = card.querySelector(".cidade-texto")?.textContent || "";
-    return normalizarTexto(nomeTexto).includes(termo) ||
-           normalizarTexto(profissaoTexto).includes(termo) ||
-           normalizarTexto(cidadeTexto).includes(termo);
-  });
-
-  const totalPaginas = calcularTotalPaginas(cardsValidos.length);
+  const cards = JSON.parse(localStorage.getItem("profissionaisDF_cards")) || [];
+  const validos = cards.filter((c) => c.status === "publicado" && (
+    normalizarTexto(c.nome).includes(termo) ||
+    normalizarTexto(c.profissao).includes(termo) ||
+    normalizarTexto(c.cidade).includes(termo)
+  ));
+  const totalPaginas = calcularTotalPaginas(validos.length);
   if (paginaAtual < totalPaginas) {
     paginaAtual++;
     filtrarCardsVitrine(false);
-    rolarParaTopoVitrine();
+    document.getElementById("vitrine")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 });
-
-// --- SISTEMA DE FILTRO UNIFICADO INTEGRADO COM PAGINAÇÃO ---
-
-
 
 function filtrarCardsVitrine(resetPagina = true) {
   if (resetPagina) paginaAtual = 1;
 
   const termo = normalizarTexto(filtroProfissaoInput?.value || "");
-  const todosCards = Array.from(cardsGrid?.querySelectorAll(".card-visita") || []);
+  const todosCards = JSON.parse(localStorage.getItem("profissionaisDF_cards")) || [];
 
   if (limparBuscaBtn) {
     limparBuscaBtn.style.display = termo.length > 0 ? "grid" : "none";
   }
 
-  // Filtra os cards que atendem ao critério de busca
+  // REGRA FUNDAMENTAL: Só exibe cartões que tenham status === "publicado"
   const cardsValidos = todosCards.filter((card) => {
-    const nomeTexto = card.querySelector(".card-nome")?.textContent || "";
-    const profissaoTexto = card.querySelector(".card-profissao-destaque")?.textContent || "";
-    const cidadeTexto = card.querySelector(".cidade-texto")?.textContent || "";
+    if (card.status !== "publicado") return false;
 
-    const bateuNome = normalizarTexto(nomeTexto).includes(termo);
-    const bateuProfissao = normalizarTexto(profissaoTexto).includes(termo);
-    const bateuCidade = normalizarTexto(cidadeTexto).includes(termo);
+    const bateuNome = normalizarTexto(card.nome).includes(termo);
+    const bateuProfissao = normalizarTexto(card.profissao).includes(termo);
+    const bateuCidade = normalizarTexto(card.cidade).includes(termo);
 
     return bateuNome || bateuProfissao || bateuCidade;
   });
 
-  // Mensagem amigável caso não encontre nenhum resultado
-// Mensagem amigável caso não encontre nenhum resultado
-  let feedbackVazio = document.getElementById("buscaSemResultados");
   if (cardsValidos.length === 0) {
-    todosCards.forEach((c) => (c.style.display = "none"));
-    cardsGrid?.classList.remove("modo-busca-rolagem");
-    if (!feedbackVazio && cardsGrid) {
-      feedbackVazio = document.createElement("p");
-      feedbackVazio.id = "buscaSemResultados";
-      feedbackVazio.style.cssText = "grid-column: 1 / -1; text-align: center; color: #64748b; font-size: 1.05rem; padding: 40px 0;";
-      feedbackVazio.textContent = "Nenhum profissional encontrado para esta busca.";
-      cardsGrid.appendChild(feedbackVazio);
+    if (cardsGrid) {
+      cardsGrid.innerHTML = `
+        <p style="grid-column: 1 / -1; text-align: center; color: #64748b; font-size: 1.05rem; padding: 40px 0;">
+          Nenhum profissional encontrado para esta busca no DF.
+        </p>
+      `;
     }
     if (paginationContainer) paginationContainer.style.display = "none";
   } else {
-    if (feedbackVazio) feedbackVazio.remove();
-
-    // SE O USUÁRIO ESTÁ PESQUISANDO: trava a altura e ativa a rolagem interna do grid
     if (termo.length > 0) {
-      todosCards.forEach((c) => (c.style.display = "none"));
-      cardsValidos.forEach((c) => (c.style.display = ""));
+      if (cardsGrid) {
+        cardsGrid.innerHTML = cardsValidos.map((dados) => criarCardVisitaHTML(dados)).join("");
+      }
       cardsGrid?.classList.add("modo-busca-rolagem");
       if (paginationContainer) paginationContainer.style.display = "none";
-      cardsGrid.scrollTop = 0; // Volta a rolagem para o topo
     } else {
-      // SE A BUSCA ESTÁ VAZIA: desativa a rolagem interna e volta à paginação normal
       cardsGrid?.classList.remove("modo-busca-rolagem");
       renderizarPagina(cardsValidos);
     }
   }
-
 }
 
-// Dispara o filtro automaticamente ao digitar
 filtroProfissaoInput?.addEventListener("input", () => filtrarCardsVitrine(true));
-
-// Limpa a busca e restaura a vitrine na página 1
-// Limpa a busca e restaura a vitrine na página 1
 limparBuscaBtn?.addEventListener("click", () => {
   if (filtroProfissaoInput) {
     filtroProfissaoInput.value = "";
@@ -738,32 +857,15 @@ limparBuscaBtn?.addEventListener("click", () => {
   }
 });
 
-// Inicializa a paginação exibindo os primeiros 6 cards e gerando os botões
-filtrarCardsVitrine(true);
+// --- MODAL DE DETALHES DO CARTÃO (VISITANTE) ---
 
-// --- CONTROLE DO MODAL ÚNICO DO CARTÃO DE VISITA ---
-const cartaoModal = document.getElementById("cartaoModal");
-const closeCartaoModalBtn = document.getElementById("closeCartaoModalBtn");
-
-function toggleCartaoModal(isOpen) {
-  cartaoModal?.classList.toggle("open", isOpen);
-  document.body.style.overflow = isOpen ? "hidden" : "";
-}
-
-closeCartaoModalBtn?.addEventListener("click", () => toggleCartaoModal(false));
-
-cartaoModal?.addEventListener("click", (e) => {
-  if (e.target === cartaoModal) toggleCartaoModal(false);
-});
-
-// Delegação de evento: clique em "Ver Cartão" abre o modal preenchendo os dados
 cardsGrid?.addEventListener("click", (e) => {
   const btn = e.target.closest(".btn-abrir-cartao");
   if (!btn) return;
 
-const nome = btn.getAttribute("data-nome");
+  const nome = btn.getAttribute("data-nome");
   const profissao = btn.getAttribute("data-profissao");
-const bio = btn.getAttribute("data-bio") || "";
+  const bio = btn.getAttribute("data-bio") || "";
   const cnh = btn.getAttribute("data-cnh") || "";
   const cidade = btn.getAttribute("data-cidade");
   const exp = btn.getAttribute("data-exp");
@@ -773,17 +875,13 @@ const bio = btn.getAttribute("data-bio") || "";
   const instagram = btn.getAttribute("data-instagram") || "";
   const linkedin = btn.getAttribute("data-linkedin") || "";
 
-  // Preenche elementos do modal
   document.getElementById("modalFoto").src = foto;
-document.getElementById("modalProfissao").textContent = profissao;
+  document.getElementById("modalProfissao").textContent = profissao;
   document.getElementById("modalCidade").textContent = cidade;
 
-  // Formata o texto para aparecer completo: "X anos de experiência"
   const anosApenas = exp.replace(/\D/g, "");
-  const textoExpCompleto = anosApenas == 1 ? "1 ano de experiência" : `${anosApenas} anos de experiência`;
-  document.getElementById("modalExp").textContent = textoExpCompleto;
+  document.getElementById("modalExp").textContent = anosApenas == 1 ? "1 ano de experiência" : `${anosApenas} anos de experiência`;
 
-  // Preenche a Mobilidade / CNH
   const modalCnhLinha = document.getElementById("modalCnhLinha");
   const modalCnh = document.getElementById("modalCnh");
   if (modalCnhLinha && modalCnh) {
@@ -795,43 +893,34 @@ document.getElementById("modalProfissao").textContent = profissao;
     }
   }
 
-  // Preenchimento e exibição condicional da Mini Bio
   const modalBio = document.getElementById("modalBio");
   if (modalBio) {
     if (bio) {
       modalBio.textContent = bio;
       modalBio.style.display = "block";
     } else {
-      modalBio.textContent = "";
       modalBio.style.display = "none";
     }
   }
 
-  // Converte o nome para caixa mista elegante (Ex: Ana Beatriz Silva da Costa)
-  // Converte o nome para caixa mista elegante (Ex: Ana Beatriz Silva da Costa)
   const formatarNomeMisto = (str) => {
     const conectivos = ["de", "da", "do", "das", "dos", "e"];
     return str
       .toLowerCase()
       .split(" ")
-      .filter(palavra => palavra.length > 0)
-      .map((palavra, index) => {
-        if (index > 0 && conectivos.includes(palavra)) return palavra;
-        return palavra.charAt(0).toUpperCase() + palavra.slice(1);
-      })
+      .filter((p) => p.length > 0)
+      .map((p, i) => (i > 0 && conectivos.includes(p) ? p : p.charAt(0).toUpperCase() + p.slice(1)))
       .join(" ");
   };
 
   document.getElementById("modalNome").textContent = formatarNomeMisto(nome);
 
-  // WhatsApp link
   const zapNums = telefone.replace(/\D/g, "");
-  const zapHref = zapNums.length >= 10 ? `https://wa.me/55${zapNums}` : `tel:${zapNums}`;
   const modalZapLink = document.getElementById("modalZapLink");
-  if (modalZapLink) modalZapLink.href = zapHref;
+  if (modalZapLink) {
+    modalZapLink.href = zapNums.length >= 10 ? `https://wa.me/55${zapNums}` : `tel:${zapNums}`;
+  }
 
-  // E-mail link
-// E-mail link
   const modalMailLink = document.getElementById("modalMailLink");
   if (modalMailLink) {
     if (email) {
@@ -842,12 +931,10 @@ document.getElementById("modalProfissao").textContent = profissao;
     }
   }
 
-  // Redes Sociais
   const instaBtn = document.getElementById("modalInstaLink");
   if (instaBtn) {
     if (instagram) {
-      const userInsta = instagram.replace("@", "").trim();
-      instaBtn.href = `https://instagram.com/${userInsta}`;
+      instaBtn.href = `https://instagram.com/${instagram.replace("@", "").trim()}`;
       instaBtn.style.display = "inline-flex";
     } else {
       instaBtn.style.display = "none";
@@ -866,3 +953,7 @@ document.getElementById("modalProfissao").textContent = profissao;
 
   toggleCartaoModal(true);
 });
+// Inicialização Geral
+initModalListeners();
+atualizarInterfaceSessao();
+filtrarCardsVitrine(true);
