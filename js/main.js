@@ -314,8 +314,6 @@ function prepararFormularioCartao() {
     }
     if (uploadPlaceholderIcon) uploadPlaceholderIcon.style.display = "none";
   } else {
-    if (formModalTitle) formModalTitle.textContent = "Criar Meu Cartão";
-    if (formModalSub) formModalSub.textContent = "Preencha seus dados para publicar seu cartão no DF.";
     document.getElementById("nomeInput").value = usuario.nome || "";
     if (uploadPreviewImg) {
       uploadPreviewImg.src = "";
