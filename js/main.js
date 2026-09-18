@@ -1,14 +1,20 @@
+/* =========================================================================
+   MAIN MODULE - CONTROLE DA PÁGINA, EVENTOS DA VITRINE E FIRESTORE REAL-TIME
+   ========================================================================= */
+
 import { loginComGoogle, logoutUsuario, vigiarSessao } from "./auth.js";
 import { 
   toggleAuthModal, 
-  toggleDashboardModal, 
-  togglePublishModal, 
-  toggleCartaoModal, 
+  abrirPainelUsuario, 
+  abrirModalDetalhesCartao, 
+  getUsuarioLogado, 
   initModalListeners 
 } from "./modal.js";
-/* =========================================================================
-   MAIN MODULE - CONTROLE DE INTERFACE, LOGIN GOOGLE E PAINEL DO USUÁRIO
-   ========================================================================= */
+import { db } from "./firebaseConfig.js";
+import { collection, onSnapshot } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+// Cache dos cartões sincronizados com o Firestore
+let cardsMemoria = [];
 
 // --- 1. GERENCIAMENTO DO MENU MOBILE (HAMBÚRGUER) ---
 const hamburgerBtn = document.getElementById("hamburgerBtn");
@@ -25,7 +31,17 @@ function toggleMenu(forceClose = false) {
 
 toggleMenu(true);
 
-// --- TOAST NOTIFICATION ---
+hamburgerBtn?.addEventListener("click", (e) => {
+  e.stopPropagation();
+  toggleMenu();
+});
+
+menuBackdrop?.addEventListener("click", () => toggleMenu(true));
+document.querySelectorAll(".nav-links a").forEach((link) => {
+  link.addEventListener("click", () => toggleMenu(true));
+});
+
+// --- 2. NOTIFICAÇÕES (TOAST) ---
 const toastNotification = document.getElementById("toastNotification");
 const toastMessage = document.getElementById("toastMessage");
 let toastTimeout;
@@ -40,35 +56,8 @@ export function showToast(mensagem) {
   }, 3200);
 }
 
-hamburgerBtn?.addEventListener("click", (e) => {
-  e.stopPropagation();
-  toggleMenu();
-});
-
-menuBackdrop?.addEventListener("click", () => toggleMenu(true));
-document.querySelectorAll(".nav-links a").forEach((link) => {
-  link.addEventListener("click", () => toggleMenu(true));
-});
-
-
-const openAuthModalBtn = document.getElementById("openAuthModalBtn");
-const googleLoginBtn = document.getElementById("googleLoginBtn");
-const logoutBtn = document.getElementById("logoutBtn");
-const navAuthItem = document.getElementById("navAuthItem");
-const navLogoutItem = document.getElementById("navLogoutItem");
-const navPanelItem = document.getElementById("navPanelItem");
-const openDashboardNavBtn = document.getElementById("openDashboardNavBtn");
-const navUserBadgeItem = document.getElementById("navUserBadgeItem");
-const navUserBadgeBtn = document.getElementById("navUserBadgeBtn");
-const navUserPhoto = document.getElementById("navUserPhoto");
-const navUserFirstName = document.getElementById("navUserFirstName");
-
-function getUsuarioLogado() {
-  const dados = localStorage.getItem("profissionaisDF_usuario");
-  return dados ? JSON.parse(dados) : null;
-}
-
-function setUsuarioLogado(usuario) {
+// --- 3. ESTADO DA SESSÃO ---
+export function setUsuarioLogado(usuario) {
   if (usuario) {
     localStorage.setItem("profissionaisDF_usuario", JSON.stringify(usuario));
   } else {
@@ -77,44 +66,22 @@ function setUsuarioLogado(usuario) {
   atualizarInterfaceSessao();
 }
 
-// Simulação de login direto com Google (ao plugar Firebase, usará signInWithPopup)
+// --- 4. ELEMENTOS DA NAVBAR E BOTÃO DO HERO ---
+const openAuthModalBtn = document.getElementById("openAuthModalBtn");
+const googleLoginBtn = document.getElementById("googleLoginBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const navAuthItem = document.getElementById("navAuthItem");
+const navLogoutItem = document.getElementById("navLogoutItem");
+const navUserBadgeItem = document.getElementById("navUserBadgeItem");
+const navUserBadgeBtn = document.getElementById("navUserBadgeBtn");
+const navUserPhoto = document.getElementById("navUserPhoto");
+const navUserFirstName = document.getElementById("navUserFirstName");
+const heroActionBtn = document.getElementById("heroActionBtn");
+const heroGuestState = document.getElementById("heroGuestState");
+const heroLoggedState = document.getElementById("heroLoggedState");
 
-// Login oficial com popup do Google
-googleLoginBtn?.addEventListener("click", async () => {
-  try {
-    const usuario = await loginComGoogle();
-    setUsuarioLogado(usuario);
-    toggleAuthModal(false);
-    showToast(`Bem-vindo, ${usuario.nome}!`);
-    abrirPainelUsuario();
-  } catch (err) {
-    showToast("Falha ao entrar com o Google.");
-  }
-});
-
-// Logout oficial
-logoutBtn?.addEventListener("click", async () => {
-  try {
-    await logoutUsuario();
-    setUsuarioLogado(null);
-    toggleMenu(true);
-    showToast("Sessão finalizada.");
-    filtrarCardsVitrine(true);
-  } catch (err) {
-    showToast("Erro ao finalizar sessão.");
-  }
-});
-
-// Sincronização contínua com a sessão oficial do Firebase
-vigiarSessao((usuario) => {
-  setUsuarioLogado(usuario);
-});
-
-
-function atualizarInterfaceSessao() {
+export function atualizarInterfaceSessao() {
   const usuario = getUsuarioLogado();
-
-  if (navPanelItem) navPanelItem.style.display = "inline-block";
 
   if (usuario) {
     if (navLogoutItem) navLogoutItem.style.display = "inline-block";
@@ -129,222 +96,63 @@ function atualizarInterfaceSessao() {
       navUserFirstName.textContent = (usuario.nome || "Usuário").trim();
     }
 
-    if (heroActionText) heroActionText.textContent = "Acessar Meu Painel";
+    if (heroGuestState) heroGuestState.style.display = "none";
+    if (heroLoggedState) heroLoggedState.style.display = "inline-flex";
   } else {
     if (navLogoutItem) navLogoutItem.style.display = "none";
     if (navUserBadgeItem) navUserBadgeItem.style.display = "none";
     if (navAuthItem) navAuthItem.style.display = "inline-block";
 
-    if (heroActionText) heroActionText.textContent = "Divulgue sua Profissão";
+    if (heroGuestState) heroGuestState.style.display = "inline-flex";
+    if (heroLoggedState) heroLoggedState.style.display = "none";
   }
 }
 
-// Abrir modal de Login
+googleLoginBtn?.addEventListener("click", async () => {
+  try {
+    const usuario = await loginComGoogle();
+    setUsuarioLogado(usuario);
+    toggleAuthModal(false);
+    showToast(`Bem-vindo, ${usuario.nome}!`);
+    await abrirPainelUsuario();
+  } catch (err) {
+    showToast("Falha ao entrar com o Google.");
+  }
+});
+
+logoutBtn?.addEventListener("click", async () => {
+  try {
+    await logoutUsuario();
+    setUsuarioLogado(null);
+    toggleMenu(true);
+    showToast("Sessão finalizada.");
+    filtrarCardsVitrine(true);
+  } catch (err) {
+    showToast("Erro ao finalizar sessão.");
+  }
+});
+
+vigiarSessao((usuario) => {
+  setUsuarioLogado(usuario);
+});
+
 openAuthModalBtn?.addEventListener("click", () => {
   toggleMenu(true);
   toggleAuthModal(true);
 });
 
-// Abrir painel ao clicar na foto/nome no topo
 navUserBadgeBtn?.addEventListener("click", () => {
   toggleMenu(true);
   abrirPainelUsuario();
 });
 
-// Clique em Meu Painel no menu
-openDashboardNavBtn?.addEventListener("click", () => {
-  toggleMenu(true);
-  const usuario = getUsuarioLogado();
-  if (usuario) {
-    abrirPainelUsuario();
-  } else {
-    toggleAuthModal(true);
-  }
-});
-
-
-
-
-
-
-
-
-// Ação do botão no Hero
 heroActionBtn?.addEventListener("click", () => {
   const usuario = getUsuarioLogado();
   if (usuario) abrirPainelUsuario();
   else toggleAuthModal(true);
 });
 
-// --- 3. MODAL PAINEL DO USUÁRIO ---
-
-// --- 3. PAINEL DO USUÁRIO ---
-const dashUserName = document.getElementById("dashUserName");
-const dashUserEmail = document.getElementById("dashUserEmail");
-const dashUserAvatar = document.getElementById("dashUserAvatar");
-const dashCardViewBlock = document.getElementById("dashCardViewBlock");
-const dashNoCardBlock = document.getElementById("dashNoCardBlock");
-const dashCardPreviewContainer = document.getElementById("dashCardPreviewContainer");
-const btnToggleStatus = document.getElementById("btnToggleStatus");
-const toggleStatusLabel = document.getElementById("toggleStatusLabel");
-const btnEditarMeuCartao = document.getElementById("btnEditarMeuCartao");
-const btnExcluirMeuCartao = document.getElementById("btnExcluirMeuCartao");
-const btnCriarPrimeiroCartao = document.getElementById("btnCriarPrimeiroCartao");
-
-
-
-
-function getMeuCartao() {
-  const usuario = getUsuarioLogado();
-  if (!usuario) return null;
-  const cardsSalvos = JSON.parse(localStorage.getItem("profissionaisDF_cards")) || [];
-  return cardsSalvos.find((c) => c.email.toLowerCase() === usuario.email.toLowerCase()) || null;
-}
-
-function abrirPainelUsuario() {
-  const usuario = getUsuarioLogado();
-  if (!usuario) {
-    toggleAuthModal(true);
-    return;
-  }
-
-  if (dashUserName) dashUserName.textContent = usuario.nome;
-  if (dashUserEmail) dashUserEmail.textContent = usuario.email;
-  if (dashUserAvatar) dashUserAvatar.src = usuario.foto;
-
-  const meuCartao = getMeuCartao();
-
-  if (meuCartao) {
-    if (dashCardViewBlock) dashCardViewBlock.style.display = "block";
-    if (dashNoCardBlock) dashNoCardBlock.style.display = "none";
-
-    const statusBadge = meuCartao.status === "publicado"
-      ? '<span class="status-badge published"><i class="bi bi-check-circle-fill"></i> Publicado na Vitrine</span>'
-      : '<span class="status-badge paused"><i class="bi bi-pause-circle-fill"></i> Cartão Pausado (Oculto)</span>';
-
-    if (dashCardPreviewContainer) {
-      dashCardPreviewContainer.innerHTML = statusBadge + criarCardVisitaHTML(meuCartao);
-    }
-
-    if (meuCartao.status === "publicado") {
-      btnToggleStatus.className = "dash-btn btn-toggle-status paused";
-      toggleStatusLabel.textContent = "Pausar Cartão";
-    } else {
-      btnToggleStatus.className = "dash-btn btn-toggle-status";
-      toggleStatusLabel.textContent = "Publicar Cartão";
-    }
-  } else {
-    if (dashCardViewBlock) dashCardViewBlock.style.display = "none";
-    if (dashNoCardBlock) dashNoCardBlock.style.display = "block";
-  }
-
-  toggleDashboardModal(true);
-}
-
-// Botão Alternar Status (Publicado / Pausado)
-btnToggleStatus?.addEventListener("click", () => {
-  const usuario = getUsuarioLogado();
-  if (!usuario) return;
-
-  let cards = JSON.parse(localStorage.getItem("profissionaisDF_cards")) || [];
-  const idx = cards.findIndex((c) => c.email.toLowerCase() === usuario.email.toLowerCase());
-
-  if (idx !== -1) {
-    cards[idx].status = cards[idx].status === "publicado" ? "pausado" : "publicado";
-    localStorage.setItem("profissionaisDF_cards", JSON.stringify(cards));
-    showToast(cards[idx].status === "publicado" ? "Cartão publicado na vitrine!" : "Cartão pausado.");
-    abrirPainelUsuario();
-    filtrarCardsVitrine(true);
-  }
-});
-
-// Botão Excluir Cartão
-btnExcluirMeuCartao?.addEventListener("click", () => {
-  const usuario = getUsuarioLogado();
-  if (!usuario) return;
-
-  if (confirm("Tem certeza que deseja excluir seu cartão de visita?")) {
-    let cards = JSON.parse(localStorage.getItem("profissionaisDF_cards")) || [];
-    cards = cards.filter((c) => c.email.toLowerCase() !== usuario.email.toLowerCase());
-    localStorage.setItem("profissionaisDF_cards", JSON.stringify(cards));
-    showToast("Cartão excluído com sucesso.");
-    abrirPainelUsuario();
-    filtrarCardsVitrine(true);
-  }
-});
-
-// --- 4. FORMULÁRIO DO CARTÃO (CRIAÇÃO / EDIÇÃO) ---
-// --- 4. FORMULÁRIO DO CARTÃO (CRIAÇÃO / EDIÇÃO) ---
-const publishForm = document.getElementById("publishForm");
-const formModalTitle = document.getElementById("formModalTitle");
-const formModalSub = document.getElementById("formModalSub");
-const fotoInput = document.getElementById("fotoInput");
-const uploadPreviewImg = document.getElementById("uploadPreviewImg");
-const uploadPlaceholderIcon = document.getElementById("uploadPlaceholderIcon");
-
-function prepararFormularioCartao() {
-  const usuario = getUsuarioLogado();
-  if (!usuario) return;
-
-  const meuCartao = getMeuCartao();
-  publishForm?.reset();
-
-  const emailInput = document.getElementById("emailInput");
-  if (emailInput) {
-    emailInput.value = usuario.email;
-    emailInput.readOnly = true;
-  }
-
-  if (meuCartao) {
-    if (formModalTitle) formModalTitle.textContent = "Editar Meu Cartão";
-    if (formModalSub) formModalSub.textContent = "Atualize suas informações e salve as alterações.";
-    document.getElementById("nomeInput").value = meuCartao.nome || "";
-    document.getElementById("experienciaInput").value = meuCartao.experiencia !== undefined ? meuCartao.experiencia : "";
-    document.getElementById("cnhInput").value = meuCartao.cnh || "";
-    document.getElementById("cidadeInput").value = meuCartao.cidade || "";
-    document.getElementById("profissaoInput").value = meuCartao.profissao || "";
-    document.getElementById("bioInput").value = meuCartao.bio || "";
-    document.getElementById("telefoneInput").value = meuCartao.telefone || "";
-    document.getElementById("instagramInput").value = meuCartao.instagram || "";
-    document.getElementById("linkedinInput").value = meuCartao.linkedin || "";
-
-    if (uploadPreviewImg && meuCartao.fotoUrl) {
-      uploadPreviewImg.src = meuCartao.fotoUrl;
-      uploadPreviewImg.style.display = "block";
-    }
-    if (uploadPlaceholderIcon) uploadPlaceholderIcon.style.display = "none";
-  } else {
-    document.getElementById("nomeInput").value = usuario.nome || "";
-    if (uploadPreviewImg) {
-      uploadPreviewImg.src = "";
-      uploadPreviewImg.style.display = "none";
-    }
-    if (uploadPlaceholderIcon) uploadPlaceholderIcon.style.display = "block";
-  }
-
-  toggleDashboardModal(false);
-  togglePublishModal(true);
-}
-
-btnEditarMeuCartao?.addEventListener("click", prepararFormularioCartao);
-btnCriarPrimeiroCartao?.addEventListener("click", prepararFormularioCartao);
-
-fotoInput?.addEventListener("change", (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = (evt) => {
-    if (uploadPreviewImg) {
-      uploadPreviewImg.src = evt.target.result;
-      uploadPreviewImg.style.display = "block";
-    }
-    if (uploadPlaceholderIcon) uploadPlaceholderIcon.style.display = "none";
-  };
-  reader.readAsDataURL(file);
-});
-
-// --- ARRAYS E ACCORDIONS (DF) ---
+// --- 5. ARRAYS E ACCORDIONS (DF) ---
 export const CIDADES_DF = [
   "Águas Claras", "Arniqueira", "Asa Norte", "Asa Sul", "Brazlândia", "Candangolândia", "Ceilândia", "Cruzeiro", "Fercal", "Gama",
   "Guará", "Guará II", "Itapoã", "Jardim Botânico", "Lago Norte", "Lago Sul", "Núcleo Bandeirante", "Paranoá", "Park Way", "Planaltina",
@@ -408,9 +216,15 @@ function toggleCityAccordion(forceClose = false) {
 }
 
 if (cityListWrapper) {
-  cityListWrapper.innerHTML = CIDADES_DF.map(
-    (cidade) => `<button type="button" class="city-option">${cidade}</button>`
-  ).join("");
+  cityListWrapper.replaceChildren(
+    ...CIDADES_DF.map((cidade) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "city-option";
+      btn.textContent = cidade;
+      return btn;
+    })
+  );
 }
 
 cityListWrapper?.addEventListener("click", (e) => {
@@ -434,17 +248,56 @@ export function toggleProfissaoAccordion(forceClose = false) {
 }
 
 if (profissaoListWrapper) {
-  profissaoListWrapper.innerHTML = PROFISSOES_LISTA.map(
-    (prof) => `<button type="button" class="city-option">${prof}</button>`
-  ).join("");
+  const btnLimpar = document.createElement("button");
+  btnLimpar.type = "button";
+  btnLimpar.className = "city-option btn-limpar-prof";
+  btnLimpar.textContent = " Limpar seleção";
+
+  const opcoesProfissoes = PROFISSOES_LISTA.map((prof) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "city-option";
+    btn.textContent = prof;
+    return btn;
+  });
+
+  profissaoListWrapper.replaceChildren(btnLimpar, ...opcoesProfissoes);
 }
 
 profissaoListWrapper?.addEventListener("click", (e) => {
   const btn = e.target.closest(".city-option");
-  if (!btn) return;
+  if (!btn || !profissaoInput) return;
   e.stopPropagation();
-  if (profissaoInput) profissaoInput.value = btn.textContent.trim();
-  toggleProfissaoAccordion(true);
+
+  if (btn.classList.contains("btn-limpar-prof")) {
+    profissaoInput.value = "";
+    profissaoInput.rows = 1;
+    profissaoListWrapper.querySelectorAll(".city-option").forEach((b) => b.classList.remove("selected"));
+    showToast("Seleção de profissões limpa.");
+    return;
+  }
+
+  const itemEscolhido = btn.textContent.trim();
+  let selecionadas = profissaoInput.value
+    ? profissaoInput.value.split("\n").map((p) => p.trim()).filter(Boolean)
+    : [];
+
+  const index = selecionadas.indexOf(itemEscolhido);
+
+  if (index !== -1) {
+    selecionadas.splice(index, 1);
+    btn.classList.remove("selected");
+  } else {
+    if (selecionadas.length >= 3) {
+      showToast("Você pode escolher no máximo 3 profissões.");
+      return;
+    }
+    selecionadas.push(itemEscolhido);
+    btn.classList.add("selected");
+  }
+
+  profissaoInput.value = selecionadas.join("\n");
+  profissaoInput.rows = selecionadas.length > 0 ? selecionadas.length : 1;
 });
 
 const cnhAccordionHeader = document.getElementById("cnhAccordionHeader");
@@ -460,9 +313,15 @@ export function toggleCnhAccordion(forceClose = false) {
 }
 
 if (cnhListWrapper) {
-  cnhListWrapper.innerHTML = CNH_MOBILIDADE_LISTA.map(
-    (item) => `<button type="button" class="city-option">${item}</button>`
-  ).join("");
+  cnhListWrapper.replaceChildren(
+    ...CNH_MOBILIDADE_LISTA.map((item) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "city-option";
+      btn.textContent = item;
+      return btn;
+    })
+  );
 }
 
 cnhListWrapper?.addEventListener("click", (e) => {
@@ -473,206 +332,109 @@ cnhListWrapper?.addEventListener("click", (e) => {
   toggleCnhAccordion(true);
 });
 
-cityAccordionHeader?.addEventListener("click", () => {
-  toggleProfissaoAccordion(true);
-  toggleCnhAccordion(true);
-  toggleCityAccordion();
-});
-
-profissaoAccordionHeader?.addEventListener("click", () => {
-  toggleCityAccordion(true);
-  toggleCnhAccordion(true);
-  toggleProfissaoAccordion();
-});
-
-cnhAccordionHeader?.addEventListener("click", () => {
+function fecharTodosAcordeons() {
   toggleCityAccordion(true);
   toggleProfissaoAccordion(true);
-  toggleCnhAccordion();
-});
-
-// --- RENDER DO CARD DE VISITA ---
-export function criarCardVisitaHTML({ nome, experiencia, idade, cidade, profissao, bio, cnh, email, telefone, fotoUrl, instagram, linkedin }) {
-  const expValor = experiencia !== undefined ? experiencia : idade;
-  const textoExp = expValor == 1 ? "1 ano exp." : `${expValor} anos exp.`;
-  const miniBio = bio || "";
-  const mobilidade = cnh || "";
-
-  return `
-    <div class="card-visita">
-      <div class="card-perfil-col">
-        <div class="card-avatar">
-          <img src="${fotoUrl}" alt="${nome}" onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=300'">
-        </div>
-
-        <div class="card-dados-pessoais">
-          <div class="card-header-nome">
-            <h3 class="card-nome" title="${nome.toUpperCase()}">${nome.toUpperCase()}</h3>
-          </div>
-          
-          <div class="card-profissao-destaque" title="${profissao}">
-            <i class="bi bi-person-workspace"></i>
-            <span>${profissao}</span>
-          </div>
-
-          <div class="card-linha-discreta">
-            <i class="bi bi-geo-alt-fill"></i>
-            <span class="cidade-texto" title="${cidade}">${cidade}</span>
-            <span class="separador-bullet">•</span>
-            <span class="exp-destaque">${textoExp}</span>
-          </div>
-
-          <button type="button" 
-                  class="btn-abrir-cartao" 
-                  data-nome="${nome}"
-                  data-profissao="${profissao}"
-                  data-bio="${miniBio}"
-                  data-cnh="${mobilidade}"
-                  data-cidade="${cidade}"
-                  data-exp="${textoExp}"
-                  data-foto="${fotoUrl}"
-                  data-telefone="${telefone}"
-                  data-email="${email}"
-                  data-instagram="${instagram || ''}"
-                  data-linkedin="${linkedin || ''}">
-            <i class="bi bi-person-vcard-fill"></i> Ver mais
-          </button>
-        </div>
-      </div>
-    </div>
-  `;
+  toggleCnhAccordion(true);
 }
 
-// --- MÁSCARA TELEFONE (DF) ---
-const telefoneInput = document.getElementById("telefoneInput");
+cityAccordionHeader?.addEventListener("click", (e) => {
+  e.stopPropagation();
+  const isOpen = cityAccordionDrawer?.classList.contains("open");
+  fecharTodosAcordeons();
+  if (!isOpen) toggleCityAccordion();
+});
 
-telefoneInput?.addEventListener("input", (e) => {
-  let apenasNumeros = e.target.value.replace(/\D/g, "");
-  if (apenasNumeros.startsWith("61")) apenasNumeros = apenasNumeros.slice(2);
-  apenasNumeros = apenasNumeros.slice(0, 9);
+profissaoAccordionHeader?.addEventListener("click", (e) => {
+  e.stopPropagation();
+  const isOpen = profissaoAccordionDrawer?.classList.contains("open");
+  fecharTodosAcordeons();
+  if (!isOpen) toggleProfissaoAccordion();
+});
 
-  if (apenasNumeros.length === 0) {
-    e.target.value = "";
-    return;
-  }
-  if (apenasNumeros.length <= 5) {
-    e.target.value = `(61) ${apenasNumeros}`;
-  } else {
-    e.target.value = `(61) ${apenasNumeros.slice(0, 5)}-${apenasNumeros.slice(5)}`;
+cnhAccordionHeader?.addEventListener("click", (e) => {
+  e.stopPropagation();
+  const isOpen = cnhAccordionDrawer?.classList.contains("open");
+  fecharTodosAcordeons();
+  if (!isOpen) toggleCnhAccordion();
+});
+
+document.getElementById("publishForm")?.addEventListener("click", (e) => {
+  if (!e.target.closest(".accordion-item-city")) {
+    fecharTodosAcordeons();
   }
 });
 
-function redimensionarFoto(arquivo, callback) {
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-      const maxDim = 160;
-      let width = img.width;
-      let height = img.height;
+// --- 6. RENDER DO CARD DE VISITA VIA TEMPLATE ---
+const cardTemplate = document.getElementById("cardVisitaTemplate");
 
-      if (width > height) {
-        if (width > maxDim) {
-          height *= maxDim / width;
-          width = maxDim;
-        }
-      } else {
-        if (height > maxDim) {
-          width *= maxDim / height;
-          height = maxDim;
-        }
-      }
+export function criarCardVisitaElemento({ nome, experiencia, cidade, profissao, bio, cnh, email, telefone, fotoUrl, instagram, linkedin }) {
+  const clone = cardTemplate.content.firstElementChild.cloneNode(true);
+  const textoExp = experiencia == 1 ? "1 ano de experiência" : `${experiencia} anos de experiência`;
 
-      canvas.width = width;
-      canvas.height = height;
-      ctx.drawImage(img, 0, 0, width, height);
-      callback(canvas.toDataURL("image/jpeg", 0.65));
-    };
-    img.src = e.target.result;
+  const img = clone.querySelector(".card-img");
+  img.src = fotoUrl;
+  img.alt = nome;
+  img.onerror = () => {
+    img.src = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=300";
   };
-  reader.readAsDataURL(arquivo);
+
+  const nomeEl = clone.querySelector(".card-nome");
+  nomeEl.textContent = nome.toUpperCase();
+  nomeEl.title = nome.toUpperCase();
+
+  const profs = profissao ? profissao.split("\n").map((p) => p.trim()).filter(Boolean) : [];
+
+  const l1 = clone.querySelector(".card-prof-linha-1");
+  const t1 = clone.querySelector(".card-prof-texto-1");
+  if (t1) {
+    t1.textContent = profs[0] || profissao;
+    t1.title = profs[0] || profissao;
+  }
+
+  const l2 = clone.querySelector(".card-prof-linha-2");
+  const t2 = clone.querySelector(".card-prof-texto-2");
+  if (l2 && t2 && profs[1]) {
+    t2.textContent = profs[1];
+    t2.title = profs[1];
+    l2.style.display = "flex";
+  }
+
+  const l3 = clone.querySelector(".card-prof-linha-3");
+  const t3 = clone.querySelector(".card-prof-texto-3");
+  if (l3 && t3 && profs[2]) {
+    t3.textContent = profs[2];
+    t3.title = profs[2];
+    l3.style.display = "flex";
+  }
+
+  const cidadeEl = clone.querySelector(".cidade-texto");
+  cidadeEl.textContent = cidade;
+  cidadeEl.title = cidade;
+
+  clone.querySelector(".exp-destaque").textContent = textoExp;
+
+  const btn = clone.querySelector(".btn-abrir-cartao");
+  btn.dataset.nome = nome;
+  btn.dataset.profissao = profissao;
+  btn.dataset.bio = bio || "";
+  btn.dataset.cnh = cnh || "";
+  btn.dataset.cidade = cidade;
+  btn.dataset.exp = textoExp;
+  btn.dataset.foto = fotoUrl;
+  btn.dataset.telefone = telefone;
+  btn.dataset.email = email;
+  btn.dataset.instagram = instagram || "";
+  btn.dataset.linkedin = linkedin || "";
+
+  return clone;
 }
 
-// --- SUBMISSÃO DO FORMULÁRIO DO CARTÃO ---
-publishForm?.addEventListener("submit", (e) => {
-  e.preventDefault();
-
-  const usuario = getUsuarioLogado();
-  if (!usuario) return;
-
-  const fotoArquivo = document.getElementById("fotoInput").files[0];
-  const nome = document.getElementById("nomeInput").value.trim();
-  const experiencia = document.getElementById("experienciaInput").value.trim();
-  const cnh = document.getElementById("cnhInput")?.value.trim() || "";
-  const cidade = document.getElementById("cidadeInput").value.trim();
-  const profissao = document.getElementById("profissaoInput").value.trim();
-  const bio = document.getElementById("bioInput")?.value.trim() || "";
-  const email = usuario.email;
-  const telefone = document.getElementById("telefoneInput").value.trim();
-  const instagram = document.getElementById("instagramInput")?.value.trim() || "";
-  const linkedin = document.getElementById("linkedinInput")?.value.trim() || "";
-
-  let cards = JSON.parse(localStorage.getItem("profissionaisDF_cards")) || [];
-  const idx = cards.findIndex((c) => c.email.toLowerCase() === email.toLowerCase());
-  const cartaoExistente = idx !== -1 ? cards[idx] : null;
-
-  if (!fotoArquivo && !cartaoExistente?.fotoUrl) {
-    showToast("Por favor, selecione uma foto para o seu cartão.");
-    return;
-  }
-
-  const numerosTelefone = telefone.replace(/\D/g, "");
-  if (numerosTelefone.length !== 11 || !numerosTelefone.startsWith("61")) {
-    showToast("Digite um telefone válido do DF com DDD (61) e 9 dígitos.");
-    telefoneInput?.focus();
-    return;
-  }
-
-  const salvarCardFinal = (fotoUrlFinal) => {
-    const dadosCard = {
-      nome,
-      experiencia,
-      cnh,
-      cidade,
-      profissao,
-      bio,
-      email,
-      telefone,
-      fotoUrl: fotoUrlFinal,
-      instagram,
-      linkedin,
-      status: cartaoExistente ? cartaoExistente.status : "publicado" // Nasce publicado por padrão
-    };
-
-    if (idx !== -1) {
-      cards[idx] = dadosCard;
-      showToast("Cartão atualizado com sucesso!");
-    } else {
-      cards.unshift(dadosCard);
-      showToast("Cartão criado e publicado na vitrine!");
-    }
-
-    localStorage.setItem("profissionaisDF_cards", JSON.stringify(cards));
-    togglePublishModal(false);
-    abrirPainelUsuario();
-    filtrarCardsVitrine(true);
-  };
-
-  if (fotoArquivo) {
-    redimensionarFoto(fotoArquivo, (novaFotoUrl) => {
-      salvarCardFinal(novaFotoUrl);
-    });
-  } else {
-    salvarCardFinal(cartaoExistente.fotoUrl);
-  }
-});
-
-// --- BUSCA E VITRINE (EXIBE APENAS CARTÕES COM STATUS 'PUBLICADO') ---
+// --- 7. BUSCA E VITRINE COM PAGINAÇÃO ---
 const cardsGrid = document.getElementById("cardsGrid");
 const filtroProfissaoInput = document.getElementById("filtroProfissaoInput");
 const limparBuscaBtn = document.getElementById("limparBuscaBtn");
+const buscaVaziaMsg = document.getElementById("buscaVaziaMsg");
 
 function normalizarTexto(txt) {
   return txt
@@ -715,10 +477,55 @@ function renderizarPagina(cardsFiltrados) {
 
   const cardsPagina = cardsFiltrados.slice(inicio, fim);
   if (cardsGrid) {
-    cardsGrid.innerHTML = cardsPagina.map((dados) => criarCardVisitaHTML(dados)).join("");
+    const fragmento = document.createDocumentFragment();
+    cardsPagina.forEach((dados) => fragmento.appendChild(criarCardVisitaElemento(dados)));
+    
+    if (buscaVaziaMsg) buscaVaziaMsg.style.display = "none";
+    cardsGrid.replaceChildren(fragmento);
   }
 
   desenharControlesPaginacao(totalPaginas);
+}
+
+export function filtrarCardsVitrine(resetPagina = true) {
+  if (resetPagina) paginaAtual = 1;
+
+  const termo = normalizarTexto(filtroProfissaoInput?.value || "");
+
+  if (limparBuscaBtn) {
+    limparBuscaBtn.style.display = termo.length > 0 ? "grid" : "none";
+  }
+
+  const cardsValidos = cardsMemoria.filter((card) => {
+    if (card.status !== "publicado") return false;
+
+    const nome = normalizarTexto(card.nome || "");
+    const profissao = normalizarTexto(card.profissao || "");
+    const cidade = normalizarTexto(card.cidade || "");
+
+    return nome.includes(termo) || profissao.includes(termo) || cidade.includes(termo);
+  });
+
+  if (cardsValidos.length === 0) {
+    if (buscaVaziaMsg) buscaVaziaMsg.style.display = "block";
+    if (cardsGrid) cardsGrid.replaceChildren(buscaVaziaMsg);
+    if (paginationContainer) paginationContainer.style.display = "none";
+  } else {
+    if (buscaVaziaMsg) buscaVaziaMsg.style.display = "none";
+
+    if (termo.length > 0) {
+      if (cardsGrid) {
+        const fragmento = document.createDocumentFragment();
+        cardsValidos.forEach((dados) => fragmento.appendChild(criarCardVisitaElemento(dados)));
+        cardsGrid.replaceChildren(fragmento);
+      }
+      cardsGrid?.classList.add("modo-busca-rolagem");
+      if (paginationContainer) paginationContainer.style.display = "none";
+    } else {
+      cardsGrid?.classList.remove("modo-busca-rolagem");
+      renderizarPagina(cardsValidos);
+    }
+  }
 }
 
 function desenharControlesPaginacao(totalPaginas) {
@@ -760,11 +567,10 @@ btnPaginaAnterior?.addEventListener("click", () => {
 
 btnPaginaProxima?.addEventListener("click", () => {
   const termo = normalizarTexto(filtroProfissaoInput?.value || "");
-  const cards = JSON.parse(localStorage.getItem("profissionaisDF_cards")) || [];
-  const validos = cards.filter((c) => c.status === "publicado" && (
-    normalizarTexto(c.nome).includes(termo) ||
-    normalizarTexto(c.profissao).includes(termo) ||
-    normalizarTexto(c.cidade).includes(termo)
+  const validos = cardsMemoria.filter((c) => c.status === "publicado" && (
+    normalizarTexto(c.nome || "").includes(termo) ||
+    normalizarTexto(c.profissao || "").includes(termo) ||
+    normalizarTexto(c.cidade || "").includes(termo)
   ));
   const totalPaginas = calcularTotalPaginas(validos.length);
   if (paginaAtual < totalPaginas) {
@@ -774,48 +580,18 @@ btnPaginaProxima?.addEventListener("click", () => {
   }
 });
 
-function filtrarCardsVitrine(resetPagina = true) {
-  if (resetPagina) paginaAtual = 1;
-
-  const termo = normalizarTexto(filtroProfissaoInput?.value || "");
-  const todosCards = JSON.parse(localStorage.getItem("profissionaisDF_cards")) || [];
-
-  if (limparBuscaBtn) {
-    limparBuscaBtn.style.display = termo.length > 0 ? "grid" : "none";
-  }
-
-  // REGRA FUNDAMENTAL: Só exibe cartões que tenham status === "publicado"
-  const cardsValidos = todosCards.filter((card) => {
-    if (card.status !== "publicado") return false;
-
-    const bateuNome = normalizarTexto(card.nome).includes(termo);
-    const bateuProfissao = normalizarTexto(card.profissao).includes(termo);
-    const bateuCidade = normalizarTexto(card.cidade).includes(termo);
-
-    return bateuNome || bateuProfissao || bateuCidade;
+// Sincronização em tempo real da coleção 'cartoes' com o Firestore
+function iniciarSincronizacaoFirestore() {
+  const colecaoRef = collection(db, "cartoes");
+  onSnapshot(colecaoRef, (snapshot) => {
+    cardsMemoria = [];
+    snapshot.forEach((doc) => {
+      cardsMemoria.push({ id: doc.id, ...doc.data() });
+    });
+    filtrarCardsVitrine(false);
+  }, (error) => {
+    console.error("Erro ao sincronizar com Firestore:", error);
   });
-
-  if (cardsValidos.length === 0) {
-    if (cardsGrid) {
-      cardsGrid.innerHTML = `
-        <p style="grid-column: 1 / -1; text-align: center; color: #64748b; font-size: 1.05rem; padding: 40px 0;">
-          Nenhum profissional encontrado para esta busca no DF.
-        </p>
-      `;
-    }
-    if (paginationContainer) paginationContainer.style.display = "none";
-  } else {
-    if (termo.length > 0) {
-      if (cardsGrid) {
-        cardsGrid.innerHTML = cardsValidos.map((dados) => criarCardVisitaHTML(dados)).join("");
-      }
-      cardsGrid?.classList.add("modo-busca-rolagem");
-      if (paginationContainer) paginationContainer.style.display = "none";
-    } else {
-      cardsGrid?.classList.remove("modo-busca-rolagem");
-      renderizarPagina(cardsValidos);
-    }
-  }
 }
 
 filtroProfissaoInput?.addEventListener("input", () => filtrarCardsVitrine(true));
@@ -827,103 +603,13 @@ limparBuscaBtn?.addEventListener("click", () => {
   }
 });
 
-// --- MODAL DE DETALHES DO CARTÃO (VISITANTE) ---
-
+// --- 8. EVENTO PARA ABRIR O DETALHE DO CARD ---
 cardsGrid?.addEventListener("click", (e) => {
   const btn = e.target.closest(".btn-abrir-cartao");
-  if (!btn) return;
-
-  const nome = btn.getAttribute("data-nome");
-  const profissao = btn.getAttribute("data-profissao");
-  const bio = btn.getAttribute("data-bio") || "";
-  const cnh = btn.getAttribute("data-cnh") || "";
-  const cidade = btn.getAttribute("data-cidade");
-  const exp = btn.getAttribute("data-exp");
-  const foto = btn.getAttribute("data-foto");
-  const telefone = btn.getAttribute("data-telefone") || "";
-  const email = btn.getAttribute("data-email") || "";
-  const instagram = btn.getAttribute("data-instagram") || "";
-  const linkedin = btn.getAttribute("data-linkedin") || "";
-
-  document.getElementById("modalFoto").src = foto;
-  document.getElementById("modalProfissao").textContent = profissao;
-  document.getElementById("modalCidade").textContent = cidade;
-
-  const anosApenas = exp.replace(/\D/g, "");
-  document.getElementById("modalExp").textContent = anosApenas == 1 ? "1 ano de experiência" : `${anosApenas} anos de experiência`;
-
-  const modalCnhLinha = document.getElementById("modalCnhLinha");
-  const modalCnh = document.getElementById("modalCnh");
-  if (modalCnhLinha && modalCnh) {
-    if (cnh) {
-      modalCnh.textContent = cnh;
-      modalCnhLinha.style.display = "flex";
-    } else {
-      modalCnhLinha.style.display = "none";
-    }
-  }
-
-  const modalBio = document.getElementById("modalBio");
-  if (modalBio) {
-    if (bio) {
-      modalBio.textContent = bio;
-      modalBio.style.display = "block";
-    } else {
-      modalBio.style.display = "none";
-    }
-  }
-
-  const formatarNomeMisto = (str) => {
-    const conectivos = ["de", "da", "do", "das", "dos", "e"];
-    return str
-      .toLowerCase()
-      .split(" ")
-      .filter((p) => p.length > 0)
-      .map((p, i) => (i > 0 && conectivos.includes(p) ? p : p.charAt(0).toUpperCase() + p.slice(1)))
-      .join(" ");
-  };
-
-  document.getElementById("modalNome").textContent = formatarNomeMisto(nome);
-
-  const zapNums = telefone.replace(/\D/g, "");
-  const modalZapLink = document.getElementById("modalZapLink");
-  if (modalZapLink) {
-    modalZapLink.href = zapNums.length >= 10 ? `https://wa.me/55${zapNums}` : `tel:${zapNums}`;
-  }
-
-  const modalMailLink = document.getElementById("modalMailLink");
-  if (modalMailLink) {
-    if (email) {
-      modalMailLink.href = `mailto:${email}`;
-      modalMailLink.style.display = "inline-flex";
-    } else {
-      modalMailLink.style.display = "none";
-    }
-  }
-
-  const instaBtn = document.getElementById("modalInstaLink");
-  if (instaBtn) {
-    if (instagram) {
-      instaBtn.href = `https://instagram.com/${instagram.replace("@", "").trim()}`;
-      instaBtn.style.display = "inline-flex";
-    } else {
-      instaBtn.style.display = "none";
-    }
-  }
-
-  const linkedinBtn = document.getElementById("modalLinkedinLink");
-  if (linkedinBtn) {
-    if (linkedin) {
-      linkedinBtn.href = linkedin.startsWith("http") ? linkedin : `https://${linkedin}`;
-      linkedinBtn.style.display = "inline-flex";
-    } else {
-      linkedinBtn.style.display = "none";
-    }
-  }
-
-  toggleCartaoModal(true);
+  if (btn) abrirModalDetalhesCartao(btn);
 });
+
 // Inicialização Geral
 initModalListeners();
 atualizarInterfaceSessao();
-filtrarCardsVitrine(true);
+iniciarSincronizacaoFirestore();

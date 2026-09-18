@@ -3,6 +3,7 @@
    ========================================================================= */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAigW4B605VjE5uCVEJGkvv9CQlTxR3Bvw",
@@ -19,3 +20,6 @@ export const app = initializeApp(firebaseConfig);
 // Inicializa o serviço de autenticação e o provedor Google
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
+
+// Inicializa o Banco de Dados Cloud Firestore
+export const db = getFirestore(app);

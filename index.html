@@ -30,7 +30,7 @@
           <li id="navLogoutItem" style="display: none;"><a href="javascript:void(0)" id="logoutBtn" style="color: #ef4444;">Sair</a></li>
           <li><a href="#vitrine">Profissionais</a></li>
           <li><a href="#quem-somos">Quem Somos</a></li>
-          <li id="navPanelItem"><a href="javascript:void(0)" id="openDashboardNavBtn">Meu Painel</a></li>
+          <!---<li id="navPanelItem"><a href="javascript:void(0)" id="openDashboardNavBtn">Meu Painel</a></li> --->
         </ul>
       </nav>
       <!-- Slot ÚNICO de perfil/login (atende Desktop e Mobile simultaneamente) -->
@@ -54,19 +54,27 @@
   <div class="menu-backdrop" id="menuBackdrop"></div>
 
   <!-- ================= HERO SECTION ================= -->
+<!-- ================= HERO SECTION ================= -->
   <section class="hero-section">
     <div class="hero-content">
       <h1>Encontre os Melhores Profissionais do <span>Distrito Federal</span></h1>
       <p>Contrate diretamente sem intermediários ou taxas. Eletricistas, professores, designers, advogados e técnicos no quadradinho.</p>
       <div class="hero-actions">
+          <!-- Botão com estados nativos do HTML (Zero injeção via JS) -->
+        <button class="btn-primary-publish" id="heroActionBtn">
+          <span id="heroGuestState">
+            <i class="bi bi-person-badge-fill"></i> Divulgue sua Profissão
+          </span>
+          <span id="heroLoggedState" style="display: none;">
+            <i class=""></i> Acessar Meu Painel
+          </span>
+        </button>
         <div class="hero-search-box">
           <i class="bi bi-search"></i>
           <input type="text" id="filtroProfissaoInput" placeholder="Buscar por profissão ou cidade (ex: Ceilândia, Eletricista...)" autocomplete="off">
           <button type="button" id="limparBuscaBtn" class="hero-search-clear" style="display: none;" title="Limpar busca">✕</button>
         </div>
-        <button class="btn-primary-publish" id="heroActionBtn">
-          <i class="bi bi-person-badge-fill"></i> <span id="heroActionText">Divulgue sua Profissão</span>
-        </button>
+      
       </div>
     </div>
   </section>
@@ -79,10 +87,13 @@
     </div>
 
     <div class="cards-grid" id="cardsGrid">
-      <!-- Cards renderizados dinamicamente via JS -->
+      <p id="buscaVaziaMsg" class="busca-vazia-alerta" style="display: none;">
+        Nenhum profissional encontrado para esta busca no DF.
+      </p>
     </div>
   </main>
 
+  
   <!-- ================= PAGINAÇÃO DINÂMICA ================= -->
   <div class="pagination-container" id="paginationContainer" style="margin-bottom: 50px;">
     <button type="button" class="pagination-btn nav-btn" id="btnPaginaAnterior" aria-label="Página anterior">
@@ -209,8 +220,15 @@
       </div>
 
       <!-- Estado A: Cartão Existente -->
+      <!-- Estado A: Cartão Existente -->
       <div id="dashCardViewBlock" class="dash-view-block">
-        <div class="dash-card-preview-wrapper" id="dashCardPreviewContainer"></div>
+        <div class="dash-card-preview-wrapper">
+          <span id="dashStatusBadge" class="status-badge published">
+            <i id="dashStatusBadgeIcon" class="bi bi-check-circle-fill"></i>
+            <span id="dashStatusBadgeText">Publicado na Vitrine</span>
+          </span>
+          <div id="dashCardPreviewSlot"></div>
+        </div>
 
         <div class="dash-actions-row">
           <button type="button" class="dash-btn btn-toggle-status" id="btnToggleStatus">
@@ -256,7 +274,7 @@
             <i class="bi bi-camera" id="uploadPlaceholderIcon"></i>
           </div>
           <label for="fotoInput" class="btn-blue-choose">
-            <i class="bi bi-upload"></i> Escolher Foto
+            <i class="bi bi-upload"></i> Editar Foto
           </label>
           <input type="file" id="fotoInput" accept="image/*" class="hidden-file-input">
         </div>
@@ -272,8 +290,8 @@
         <div class="input-row-item">
           <div class="row-icon-box"><i class="bi bi-award"></i></div>
           <div class="row-input-wrap">
-            <label for="experienciaInput">Tempo de Experiência</label>
-            <input type="number" id="experienciaInput" placeholder="Ex: 5 (anos)" required min="0" max="60">
+           <label for="experienciaInput">Tempo de Experiência</label>
+            <input type="number" id="experienciaInput" placeholder="Ex: 5 (anos)" required min="0" max="50">
           </div>
         </div>
 
@@ -310,7 +328,7 @@
           <div class="row-input-wrap">
             <label for="profissaoInput">Profissão / Serviço</label>
             <div class="city-accordion-header" id="profissaoAccordionHeader">
-              <input type="text" id="profissaoInput" placeholder="Selecione sua profissão / serviço" readonly required>
+              <textarea id="profissaoInput" rows="1" placeholder="Selecione sua profissão / serviço" readonly required></textarea>
               <i class="bi bi-chevron-down accordion-arrow" id="profissaoArrowIcon"></i>
             </div>
             <div class="city-accordion-drawer" id="profissaoAccordionDrawer">
@@ -319,11 +337,11 @@
           </div>
         </div>
 
-        <div class="input-row-item">
+    <div class="input-row-item bio-row-item">
           <div class="row-icon-box"><i class="bi bi-chat-left-text"></i></div>
           <div class="row-input-wrap">
             <label for="bioInput">Resumo dos Serviços (Mini Bio)</label>
-            <input type="text" id="bioInput" placeholder="Ex: Manutenção residencial, instalações e suporte rápido." maxlength="120">
+            <textarea id="bioInput" rows="3" placeholder="Ex: Manutenção residencial, instalações e suporte rápido." maxlength="120"></textarea>
           </div>
         </div>
 
@@ -347,15 +365,15 @@
           <div class="row-icon-box"><i class="bi bi-instagram"></i></div>
           <div class="row-input-wrap">
             <label for="instagramInput">Instagram</label>
-            <input type="text" id="instagramInput" placeholder="@seu.perfil">
+            <input type="text" id="instagramInput" placeholder="@seu.perfil" maxlength="25">
           </div>
         </div>
 
         <div class="input-row-item">
           <div class="row-icon-box"><i class="bi bi-linkedin"></i></div>
           <div class="row-input-wrap">
-            <label for="linkedinInput">LinkedIn ou Site</label>
-            <input type="text" id="linkedinInput" placeholder="link ou perfil">
+            <label for="linkedinInput">LinkedIn ou Perfil</label>
+            <input type="text" id="linkedinInput" placeholder="perfil" maxlength="25">
           </div>
         </div>
 
@@ -378,12 +396,23 @@
         <h3 id="modalNome" class="cartao-modal-nome"></h3>
 
         <div class="cartao-modal-detalhes-bloco">
-          <div class="cartao-modal-profissao">
-            <i class="bi bi-person-workspace"></i>
-            <span id="modalProfissao"></span>
+          <div class="cartao-modal-profissoes-lista">
+            <div class="cartao-modal-profissao" id="modalProfissaoLinha1">
+              <i class="bi bi-person-workspace"></i>
+              <span id="modalProfissao1"></span>
+            </div>
+            <div class="cartao-modal-profissao" id="modalProfissaoLinha2" style="display: none;">
+              <i class="bi bi-person-workspace"></i>
+              <span id="modalProfissao2"></span>
+            </div>
+            <div class="cartao-modal-profissao" id="modalProfissaoLinha3" style="display: none;">
+              <i class="bi bi-person-workspace"></i>
+              <span id="modalProfissao3"></span>
+            </div>
           </div>
 
           <div class="cartao-modal-detalhes-lista">
+
             <div class="modal-info-linha-item">
               <i class="bi bi-geo-alt-fill"></i>
               <span id="modalCidade"></span>
@@ -420,16 +449,77 @@
     </div>
   </div>
 
+
+
+  <!-- Toast de Notificação -->
+<!-- Toast de Notificação -->
+  <div id="toastNotification" class="toast-notification">
+    <i class="bi bi-exclamation-circle-fill toast-icon"></i>
+    <span id="toastMessage" class="toast-message"></span>
+  </div>
+
+
+<!-- Template Nativo do Card (Zero HTML gerado por JS) -->
+  <template id="cardVisitaTemplate">
+    <div class="card-visita">
+      <div class="card-perfil-col">
+        <div class="card-avatar">
+          <img class="card-img" src="" alt="Foto">
+        </div>
+        <div class="card-dados-pessoais">
+          <div class="card-header-nome">
+            <h3 class="card-nome"></h3>
+          </div>
+          <div class="card-profissoes-lista">
+            <div class="card-profissao-linha card-prof-linha-1">
+              <i class="bi bi-person-workspace"></i>
+              <span class="card-prof-texto-1"></span>
+            </div>
+            <div class="card-profissao-linha card-prof-linha-2" style="display: none;">
+              <i class="bi bi-person-workspace"></i>
+              <span class="card-prof-texto-2"></span>
+            </div>
+            <div class="card-profissao-linha card-prof-linha-3" style="display: none;">
+              <i class="bi bi-person-workspace"></i>
+              <span class="card-prof-texto-3"></span>
+            </div>
+          </div>
+          <div class="card-linha-discreta">
+            <i class="bi bi-geo-alt-fill"></i>
+            <span class="cidade-texto"></span>
+            <span class="separador-bullet">•</span>
+            <span class="exp-destaque"></span>
+          </div>
+          <button type="button" class="btn-abrir-cartao">
+            <i class="bi bi-person-vcard-fill"></i> Ver mais
+          </button>
+        </div>
+      </div>
+    </div>
+  </template>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   <!-- Rodapé -->
   <footer class="main-footer">
     <p>&copy; kbsweb 2026 | ProfissionaisDF - Todos os direitos reservados.</p>
   </footer>
 
-  <!-- Toast de Notificação -->
-  <div id="toastNotification" class="toast-notification">
-    <i class="bi bi-exclamation-circle-fill toast-icon"></i>
-    <span id="toastMessage" class="toast-message"></span>
-  </div>
+
 
   <script type="module" src="./js/main.js"></script>
 </body>
